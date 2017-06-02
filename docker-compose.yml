@@ -1,59 +1,43 @@
-version: "2.1"
-
+version: '2'
 services:
-    nginx:
-        build: ./nginx/
-        container_name: "${PROJECT_NAME}_nginx"
+    rails:
+        image: rails:5.0.0.1
+        hostname: "${PROJECT_NAME}_rails"
+        container_name: "${PROJECT_NAME}_rails"
         ports:
-            - 80:80
+            - 3000:3000
         volumes:
-            - "${PROJECT_ROOT}:/var/www/html:ro"
-        networks:
-            - server
-        depends_on:
-            - php
+            - "../${PROJECT_ROOT}:/usr/src/app"
+        working_dir: /usr/src/app
+        links:
+            - postgresql
+        command: [ "rails", "server", "-b", "0.0.0.0" ]
+        entrypoint: ./postinstall.sh
 
-    php:
-        build: ./php/
-        container_name: "${PROJECT_NAME}_php"
-        expose:
-            - 9000
-        volumes:
-            - "${PROJECT_ROOT}:/var/www/html"
-        networks:
-            - database
-            - server
-        depends_on:
-            - mysql
-
-    mysql:
-        image: mysql:latest
+    postgresql:
+        image: postgres:9.6
+        hostname: "${PROJECT_NAME}_db"
         container_name: "${PROJECT_NAME}_db"
-        volumes:
-            - data:/var/lib/mysql
-        networks:
-            - database
+        volumes_from:
+            - data
         environment:
-            MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD}"
-            MYSQL_DATABASE: "${DB_NAME}"
-            MYSQL_USER: "${DB_USERNAME}"
-            MYSQL_PASSWORD: "${DB_PASSWORD}"
-
-    phpmyadmin:
-        image: phpmyadmin/phpmyadmin
-        container_name: "${PROJECT_NAME}_phpmyadmin"
-        ports:
-            - 8080:80
-        networks:
-            - database
-        depends_on:
-            - mysql
-        environment:
-            PMA_HOST: mysql
-
-volumes:
+            POSTGRES_PASSWORD: "${DB_PASSWORD}"
+            POSTGRES_USER: "${DB_USERNAME}"
+            POSTGRES_DB: "${DB_NAME}"
     data:
-
-networks:
-    database:
-    server:
+        image: postgres:9.6
+        hostname: "${PROJECT_NAME}_postgres_data"
+        container_name: "${PROJECT_NAME}_postgres_data"
+        volumes:
+            - /var/lib/postgresql/data
+        command: "true"
+    pg-admin:
+        image: fenglc/pgadmin4
+        hostname: "${PROJECT_NAME}_pgadmin"
+        container_name: "${PROJECT_NAME}_pgadmin"
+        ports:
+            - 5050:5050
+        links:
+            - postgresql:postgres
+        volumes:
+            - /etc/localtime:/etc/localtime

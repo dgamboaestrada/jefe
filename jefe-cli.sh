@@ -19,6 +19,58 @@ out() {
     echo "$(tput setaf $color)$text $(tput sgr 0)"
 }
 
+set_dotenv(){
+    echo "$1=$2" >> ./jefe/.env
+}
+
+get_dotenv(){
+    echo $( grep "$1" ./jefe/.env | sed -e "s/$1=//g" )
+}
+
+load_dotenv(){
+    project_type=$( get_dotenv "PROJECT_TYPE" )
+    project_name=$( get_dotenv "PROJECT_NAME" )
+    project_root=$( get_dotenv "PROJECT_ROOT" )
+    dbname=$( get_dotenv "DB_NAME" )
+    dbuser=$( get_dotenv "DB_USERNAME" )
+    dbpassword=$( get_dotenv "DB_PASSWORD" )
+    dbhost=$( get_dotenv "DB_HOST" )
+}
+
+# read yaml file
+parse_yaml() {
+   local prefix=$2
+   local s='[[:space:]]*' w='[a-zA-Z0-9_]*' fs=$(echo @|tr @ '\034')
+   sed -ne "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
+        -e "s|^\($s\)\($w\)$s:$s\(.*\)$s\$|\1$fs\2$fs\3|p"  $1 |
+   awk -F$fs '{
+      indent = length($1)/2;
+      vname[indent] = $2;
+      for (i in vname) {if (i > indent) {delete vname[i]}}
+      if (length($3) > 0) {
+         vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
+         printf("%s%s%s=\"%s\"\n", "'$prefix'",vn, $2, $3);
+      }
+   }'
+}
+
+get_yamlenv(){
+    echo $( parse_yaml ./jefe/settings.yaml | grep "^$1_$2" | sed -e "s/$1_$2=//g" | sed -e "s/\"//g")
+}
+
+load_settings_env(){
+    # access yaml content
+    user=$( get_yamlenv $1 user)
+    group=$( get_yamlenv $1 group)
+    host=$( get_yamlenv $1 host)
+    public_dir=$( get_yamlenv $1 public_dir)
+    dbname=$( get_yamlenv $1 dbname)
+    dbuser=$( get_yamlenv $1 dbuser)
+    dbpassword=$( get_yamlenv $1 dbpassword)
+    dbhost=$( get_yamlenv $1 dbhost)
+    execute=$( get_yamlenv $1 execute)
+}
+
 version() {
     echo 0.1
 }
@@ -68,47 +120,31 @@ init() {
     ###############################################################################################
     # Configure project
     ###############################################################################################
+    out "Configure project" 4
+
+    # Select type of project language
+    out "Select type of project language" 5
+    out "0) PHP" 5
+    out "1) Ruby" 5
+    echo "Type the option (number) that you want(digit), followed by [ENTER]:"
+    read option
+
     flag=true
-    project_type=php
     while [ $flag = true ]; do
-        out "Configure project" 4
-        out "Select project:" 5
-        out "0) Default" 5
-        out "1) CakePHP2.x" 5
-        out "2) CakePHP3.x" 5
-        out "3) Symfony" 5
-        out "4) Laravel" 5
-        out "5) Drupal" 5
-        out "6) Prestashop" 5
-        echo "Type the option (number) from the project that you want(digit), followed by [ENTER]:"
-        read option
+        echo $option
         case $option in
             0)
-                project="default"
+                project_type=php
+                # Docker compose var env configuration.
+                docker_env
+                configure_php_project
                 flag=false
                 ;;
             1)
-                project="cakephp2.x"
-                flag=false
-                ;;
-            2)
-                project="cakephp"
-                flag=false
-                ;;
-            3)
-                project="symfony"
-                flag=false
-                ;;
-            4)
-                project="laravel"
-                flag=false
-                ;;
-            5)
-                project="drupal"
-                flag=false
-                ;;
-            6)
-                project="prestashop"
+                project_type=ruby
+                # Docker compose var env configuration.
+                docker_env
+                configure_ruby_project
                 flag=false
                 ;;
             *)
@@ -118,10 +154,6 @@ init() {
                 ;;
         esac
     done
-    cp ./jefe/nginx/vhosts/$project.conf ./jefe/nginx/default.conf
-
-    # Docker compose var env configuration.
-    docker_env
 
     # Config environments.
     config_environments
@@ -129,29 +161,29 @@ init() {
 
 up() {
     cd ./jefe/
-    fab up
+    docker-compose up -d
     cd ..
 }
 
 stop() {
     cd ./jefe/
-    fab stop
+    docker-compose stop
     cd ..
 }
 
 down() {
     cd ./jefe/
-    fab up
+    docker-compose down -v
     cd ..
 }
 
 bluid() {
     cd ./jefe/
-    fab bluid
+    docker-compose build --no-cache
     cd ..
 }
 
-import_sql() {
+importdb() {
     while getopts ":e:f:" option; do
         case "${option}" in
             e)
@@ -172,9 +204,23 @@ import_sql() {
         f="dump.sql"
     fi
 
-    cd ./jefe/
-    fab environment:${e},true import_sql:${f}
-    cd ..
+    load_dotenv
+    if [[ "$e" == "docker" ]]; then
+        if [[ "$project_type" == "php" ]]; then
+            docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < ./database/${f}
+        fi
+        if [[ "$project_type" == "ruby" ]]; then
+            docker exec -i "${project_name}_db" psql -d $dbname -U $dbuser < ./database/$f
+        fi
+    else
+        load_settings_env $e
+        if [[ "$project_type" == "php" ]]; then
+            ssh "${user}@${host} 'mysql -u ${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./database/${f}'"
+        fi
+        if [[ "$project_type" == "ruby" ]]; then
+            ssh "${user}@${host} 'psql -d $dbname -U $dbuser < ./database/$f'"
+        fi
+    fi
 }
 
 dumpdb() {
@@ -198,9 +244,23 @@ dumpdb() {
         f="dump.sql"
     fi
 
-    cd ./jefe/
-    fab environment:${e},true dumpdb:${f}
-    cd ..
+    load_dotenv
+    if [[ "$e" == "docker" ]]; then
+        if [[ "$project_type" == "php" ]]; then
+            docker exec ${project_name}_db mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > ./database/${f}
+        fi
+        if [[ "$project_type" == "ruby" ]]; then
+            docker exec "${project_name}_db" pg_dump -U $dbuser $dbname > ./database/${f}
+        fi
+    else
+        load_settings_env $e
+        if [[ "$project_type" == "php" ]]; then
+            ssh "${user}@${host} 'mysqldump -u ${dbuser} -p\"${dbpassword}\" ${dbname}  > ./database/${f}'"
+        fi
+        if [[ "$project_type" == "ruby" ]]; then
+            ssh "${user}@${host} 'pg_dump -U $dbuser $dbname > ./database/${f}'"
+        fi
+    fi
 }
 
 resetdb() {
@@ -217,9 +277,19 @@ resetdb() {
         e="docker"
     fi
 
-    cd ./jefe/
-    fab environment:${e},true resetdb
-    cd ..
+    if [[ "$e" == "docker" ]]; then
+        load_dotenv
+        if [[ "$project_type" == "php" ]]; then
+            docker exec -i ${project_name}_db mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS {dbname}; CREATE DATABASE ${dbname}"
+        fi
+        if [[ "$project_type" == "ruby" ]]; then
+            echo "Not yet implemented"
+        fi
+    else
+        cd ./jefe/
+        fab environment:${e},true resetdb
+        cd ..
+    fi
 }
 
 drop_tables() {
@@ -298,6 +368,10 @@ execute() {
     cd ..
 }
 
+ps() {
+    docker ps
+}
+
 it() {
     while getopts ":c:" option; do
         case "${option}" in
@@ -336,46 +410,107 @@ logs() {
     cd ..
 }
 
+# configure php project
+configure_php_project() {
+    flag=true
+    while [ $flag = true ]; do
+        out "Select project:" 5
+        out "0) Default" 5
+        out "1) CakePHP2.x" 5
+        out "2) CakePHP3.x" 5
+        out "3) Symfony" 5
+        out "4) Laravel" 5
+        out "5) Drupal" 5
+        out "6) Prestashop" 5
+        echo "Type the option (number) from the project that you want(digit), followed by [ENTER]:"
+        read option
+        case $option in
+            0)
+                project="default"
+                flag=false
+                ;;
+            1)
+                project="cakephp2.x"
+                flag=false
+                ;;
+            2)
+                project="cakephp"
+                flag=false
+                ;;
+            3)
+                project="symfony"
+                flag=false
+                ;;
+            4)
+                project="laravel"
+                flag=false
+                ;;
+            5)
+                project="drupal"
+                flag=false
+                ;;
+            6)
+                project="prestashop"
+                flag=false
+                ;;
+            *)
+                out "Wrong choice:$option" 1
+                project=""
+                flag=true
+                ;;
+        esac
+    done
+    cp ./jefe/nginx/vhosts/$project.conf ./jefe/nginx/default.conf
+}
+
+# configure ruby project
+configure_ruby_project() {
+    load_dotenv
+    cp ./jefe/postinstall.sh ./$project_root/postinstall.sh
+}
+
 # Docker compose var env configuration.
 docker_env() {
     out "Docker compose var env configuration." 4
-    if [[ ! -f "./jefe/.env" ]]; then
-        cp ./jefe/default.env ./jefe/.env
-    fi
-    out "Write project name (default docker-$project_type):" 5
+    #     if [[ ! -f "./jefe/.env" ]]; then
+    #         cp ./jefe/default.env ./jefe/.env
+    #     fi
+    echo "" > ./jefe/.env
+    set_dotenv PROJECT_TYPE $project_type
+    out "Write project name (default docker_$project_type):" 5
     read option
     if [ -z $option ]; then
-        dotenv -f ./jefe/.env set PROJECT_NAME docker-$project_type
+        set_dotenv PROJECT_NAME docker_$project_type
     else
-        dotenv -f ./jefe/.env set PROJECT_NAME $option
+        set_dotenv PROJECT_NAME $option
     fi
     out "Write project root, directory path from your proyect (default app):" 5
     read option
     if [ -z $option ]; then
-        dotenv -f ./jefe/.env set PROJECT_ROOT app
+        set_dotenv PROJECT_ROOT app
     else
-        dotenv -f ./jefe/.env set PROJECT_ROOT $option
+        set_dotenv PROJECT_ROOT $option
     fi
     out "Write database name (default docker):" 5
     read option
     if [ -z $option ]; then
-        dotenv -f ./jefe/.env set DB_NAME docker
+        set_dotenv DB_NAME docker
     else
-        dotenv -f ./jefe/.env set DB_NAME $option
+        set_dotenv DB_NAME $option
     fi
     out "Write database username (default docker):" 5
     read option
     if [ -z $option ]; then
-        dotenv -f ./jefe/.env set DB_USERNAME docker
+        set_dotenv DB_USERNAME docker
     else
-        dotenv -f ./jefe/.env set DB_USERNAME $option
+        set_dotenv DB_USERNAME $option
     fi
     out "Write database password (default docker):" 5
     read option
     if [ -z $option ]; then
-        dotenv -f ./jefe/.env set DB_PASSWORD docker
+        set_dotenv DB_PASSWORD docker
     else
-        dotenv -f ./jefe/.env set DB_PASSWORD $option
+        set_dotenv DB_PASSWORD $option
     fi
 }
 
@@ -402,6 +537,7 @@ config_environments() {
             ;;
     esac
 }
+
 
 help() {
     cd ./jefe/
