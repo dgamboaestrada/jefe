@@ -20,11 +20,11 @@ out() {
 }
 
 set_dotenv(){
-    echo "$1=$2" >> ./jefe/.env
+    echo "$1=$2" >> .jefe/.env
 }
 
 get_dotenv(){
-    echo $( grep "$1" ./jefe/.env | sed -e "s/$1=//g" )
+    echo $( grep "$1" .jefe/.env | sed -e "s/$1=//g" )
 }
 
 load_dotenv(){
@@ -55,7 +55,7 @@ parse_yaml() {
 }
 
 get_yamlenv(){
-    echo $( parse_yaml ./jefe/settings.yaml | grep "^$1_$2" | sed -e "s/$1_$2=//g" | sed -e "s/\"//g")
+    echo $( parse_yaml .jefe/settings.yaml | grep "^$1_$2" | sed -e "s/$1_$2=//g" | sed -e "s/\"//g")
 }
 
 load_settings_env(){
@@ -79,7 +79,7 @@ init() {
 
     # Print logo
     tput setaf 2;
-    cat ./jefe/logo.txt
+    cat .jefe/logo.txt
 
     # create every folder needed
 
@@ -101,22 +101,6 @@ init() {
         out "it already exists." 3
     fi
 
-    out "Setting configuration files." 4
-
-    echo "Writing new values to .gitigonre..."
-    if [[ ! -f  "./.gitignore" ]]; then
-        cat ./jefe/git.gitignore >> ./.gitignore
-        out "it already exists." 3
-    else
-        while read line
-        do
-            if ! grep -q "$line"  "./.gitignore"; then
-                echo "$line" >> ./.gitignore
-            fi
-        done < ./jefe/git.gitignore
-        out "it already exists." 3
-    fi
-
     ###############################################################################################
     # Configure project
     ###############################################################################################
@@ -135,6 +119,9 @@ init() {
         case $option in
             0)
                 project_type=php
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                rm -rf jefe/.git
+                mv jefe .jefe
                 # Docker compose var env configuration.
                 docker_env
                 configure_php_project
@@ -142,6 +129,9 @@ init() {
                 ;;
             1)
                 project_type=ruby
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                rm -rf jefe/.git
+                mv jefe .jefe
                 # Docker compose var env configuration.
                 docker_env
                 configure_ruby_project
@@ -155,30 +145,44 @@ init() {
         esac
     done
 
+    echo "Writing new values to .gitigonre..."
+    if [[ ! -f  "./.gitignore" ]]; then
+        cat .jefe/git.gitignore >> ./.gitignore
+        out "it already exists." 3
+    else
+        while read line
+        do
+            if ! grep -q "$line"  "./.gitignore"; then
+                echo "$line" >> ./.gitignore
+            fi
+        done < .jefe/git.gitignore
+        out "it already exists." 3
+    fi
+
     # Config environments.
     config_environments
 }
 
 up() {
-    cd ./jefe/
+    cd .jefe/
     docker-compose up -d
     cd ..
 }
 
 stop() {
-    cd ./jefe/
+    cd .jefe/
     docker-compose stop
     cd ..
 }
 
 down() {
-    cd ./jefe/
+    cd .jefe/
     docker-compose down -v
     cd ..
 }
 
 bluid() {
-    cd ./jefe/
+    cd .jefe/
     docker-compose build --no-cache
     cd ..
 }
@@ -286,7 +290,7 @@ resetdb() {
             echo "Not yet implemented"
         fi
     else
-        cd ./jefe/
+        cd .jefe/
         fab environment:${e},true resetdb
         cd ..
     fi
@@ -306,7 +310,7 @@ drop_tables() {
         e="docker"
     fi
 
-    cd ./jefe/
+    cd .jefe/
     fab environment:${e},true drop_tables
     cd ..
 }
@@ -325,7 +329,7 @@ deploy() {
         e="docker"
     fi
 
-    cd ./jefe/
+    cd .jefe/
     fab environment:${e},true deploy
     cd ..
 }
@@ -344,7 +348,7 @@ backup() {
         e="docker"
     fi
 
-    cd ./jefe/
+    cd .jefe/
     fab environment:${e},true backup
     cd ..
 }
@@ -363,7 +367,7 @@ execute() {
         e="docker"
     fi
 
-    cd ./jefe/
+    cd .jefe/
     fab environment:${e},true execute
     cd ..
 }
@@ -386,7 +390,7 @@ it() {
         c="docker-php_php"
     fi
 
-    cd ./jefe/
+    cd .jefe/
     fab it:${c}
     cd ..
 }
@@ -405,7 +409,7 @@ logs() {
         c="docker-php_php"
     fi
 
-    cd ./jefe/
+    cd .jefe/
     fab logs:${c}
     cd ..
 }
@@ -460,22 +464,22 @@ configure_php_project() {
                 ;;
         esac
     done
-    cp ./jefe/nginx/vhosts/$project.conf ./jefe/nginx/default.conf
+    cp .jefe/nginx/vhosts/$project.conf .jefe/nginx/default.conf
 }
 
 # configure ruby project
 configure_ruby_project() {
     load_dotenv
-    cp ./jefe/postinstall.sh ./$project_root/postinstall.sh
+    cp .jefe/postinstall.sh ./$project_root/postinstall.sh
 }
 
 # Docker compose var env configuration.
 docker_env() {
     out "Docker compose var env configuration." 4
-    #     if [[ ! -f "./jefe/.env" ]]; then
-    #         cp ./jefe/default.env ./jefe/.env
+    #     if [[ ! -f ".jefe/.env" ]]; then
+    #         cp .jefe/default.env .jefe/.env
     #     fi
-    echo "" > ./jefe/.env
+    echo "" > .jefe/.env
     set_dotenv PROJECT_TYPE $project_type
     out "Write project name (default docker_$project_type):" 5
     read option
@@ -517,8 +521,8 @@ docker_env() {
 # Config environments.
 config_environments() {
     out "Config environments.." 4
-    if [[ ! -f "./jefe/.settings.yaml" ]]; then
-        cp ./jefe/default.settings.yaml ./jefe/settings.yaml
+    if [[ ! -f ".jefe/.settings.yaml" ]]; then
+        cp .jefe/default.settings.yaml .jefe/settings.yaml
     fi
     out "Select editor to open environment settings file" 5
     out "0) Vi" 5
@@ -527,20 +531,20 @@ config_environments() {
     read option
     case $option in
         0)
-            vi ./jefe/settings.yaml
+            vi .jefe/settings.yaml
             ;;
         1)
-            nano ./jefe/settings.yaml
+            nano .jefe/settings.yaml
             ;;
         *)
-            vi ./jefe/settings.yaml
+            vi .jefe/settings.yaml
             ;;
     esac
 }
 
 
 help() {
-    cd ./jefe/
+    cd .jefe/
     fab --list
     cd ..
 }
