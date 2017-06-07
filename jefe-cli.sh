@@ -81,26 +81,6 @@ init() {
     tput setaf 2;
     cat .jefe/logo.txt
 
-    # create every folder needed
-
-    out "Make directory structure." 4
-
-    echo "Creating app directory..."
-    if [[ ! -d "./app" ]]; then
-        mkdir ./app
-        out "done" 2
-    else
-        out "it already exists." 3
-    fi
-
-    echo "Creating database directory..."
-    if [[ ! -d "./database" ]]; then
-        mkdir ./database
-        out "done" 2
-    else
-        out "it already exists." 3
-    fi
-
     ###############################################################################################
     # Configure project
     ###############################################################################################
@@ -161,6 +141,25 @@ init() {
 
     # Config environments.
     config_environments
+}
+
+create_folder_structure() {
+    out "Make directory structure." 4
+    echo "Creating app directory..."
+    if [[ ! -d "./${project_root}" ]]; then
+        mkdir ./${project_root}
+        out "done" 2
+    else
+        out "it already exists." 3
+    fi
+
+    echo "Creating database directory..."
+    if [[ ! -d "./database" ]]; then
+        mkdir ./database
+        out "done" 2
+    else
+        out "it already exists." 3
+    fi
 }
 
 up() {
@@ -470,6 +469,37 @@ configure_php_project() {
 # configure ruby project
 configure_ruby_project() {
     load_dotenv
+
+    create_folder_structure
+
+    out "Select type of project ruby" 5
+    out "0) Ripper Rails API Project" 5
+    echo "Type the option (number) that you want(digit), followed by [ENTER]:"
+    read option
+    flag=true
+    while [ $flag = true ]; do
+        echo $option
+        case $option in
+            0)
+                cd ./${project_root}
+                git clone https://github.com/ricardo-pcan/ripper-rails-scaffold.git .
+                rm -rf .git
+                cp .circle.yml ../circle.yml
+                rm .circle.yml
+                rm -f ../.gitignore
+                cp .gitignore ../.gitignore
+                rm .gitignore
+                cp .env.example .env
+                cd ..
+                flag=false
+                ;;
+            *)
+                out "Wrong choice:$option" 1
+                project=""
+                flag=true
+                ;;
+        esac
+    done
     cp .jefe/postinstall.sh ./$project_root/postinstall.sh
 }
 
