@@ -548,6 +548,11 @@ docker_env() {
     fi
 }
 
+logs() {
+    cd ./.jefe
+    docker-compose logs -f
+}
+
 # Config environments.
 config_environments() {
     out "Config environments.." 4
