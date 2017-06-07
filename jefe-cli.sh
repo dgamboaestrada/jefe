@@ -415,6 +415,7 @@ logs() {
 
 # configure php project
 configure_php_project() {
+    create_folder_structure
     flag=true
     while [ $flag = true ]; do
         out "Select project:" 5
