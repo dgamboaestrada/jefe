@@ -394,25 +394,6 @@ it() {
     cd ..
 }
 
-logs() {
-    while getopts ":c:" option; do
-        case "${option}" in
-            c)
-                c=${OPTARG}
-                ;;
-        esac
-    done
-    shift $((OPTIND-1))
-
-    if [ -z "${c}" ]; then
-        c="docker-php_php"
-    fi
-
-    cd .jefe/
-    fab logs:${c}
-    cd ..
-}
-
 # configure php project
 configure_php_project() {
     create_folder_structure
@@ -552,6 +533,7 @@ docker_env() {
 logs() {
     cd ./.jefe
     docker-compose logs -f
+    cd ..
 }
 
 # Config environments.
