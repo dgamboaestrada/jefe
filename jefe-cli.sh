@@ -63,16 +63,17 @@ load_settings_env(){
     user=$( get_yamlenv $1 user)
     group=$( get_yamlenv $1 group)
     host=$( get_yamlenv $1 host)
+    port=$( get_yamlenv $1 port)
     public_dir=$( get_yamlenv $1 public_dir)
     dbname=$( get_yamlenv $1 dbname)
     dbuser=$( get_yamlenv $1 dbuser)
     dbpassword=$( get_yamlenv $1 dbpassword)
     dbhost=$( get_yamlenv $1 dbhost)
-    execute=$( get_yamlenv $1 execute)
+    exclude=$( get_yamlenv $1 exclude)
 }
 
 version() {
-    echo 0.1
+    echo 0.2
 }
 
 init() {
@@ -315,10 +316,13 @@ drop_tables() {
 }
 
 deploy() {
-    while getopts ":e:" option; do
+    while getopts ":e:t:" option; do
         case "${option}" in
             e)
                 e=${OPTARG}
+                ;;
+            t)
+                t=${OPTARG}
                 ;;
         esac
     done
@@ -328,9 +332,21 @@ deploy() {
         e="docker"
     fi
 
-    cd .jefe/
-    fab environment:${e},true deploy
-    cd ..
+    if [ -z "${t}" ]; then
+        t="false"
+    fi
+    echo $t
+
+    load_dotenv
+    load_settings_env $e
+    excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
+    if [ "${t}" == "true" ]; then
+        set -x #echo on
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
+    else
+        set -x #echo on
+        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
+    fi
 }
 
 backup() {
