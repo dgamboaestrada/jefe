@@ -368,11 +368,14 @@ backup() {
     cd ..
 }
 
-execute() {
-    while getopts ":e:" option; do
+exec() {
+    while getopts ":e:c:" option; do
         case "${option}" in
             e)
                 e=${OPTARG}
+                ;;
+            c)
+                c=${OPTARG}
                 ;;
         esac
     done
@@ -382,31 +385,17 @@ execute() {
         e="docker"
     fi
 
-    cd .jefe/
-    fab environment:${e},true execute
-    cd ..
+    load_settings_env $e
+    ssh ${user}@${host} -p $port $c
 }
 
 ps() {
     docker ps
 }
 
-it() {
-    while getopts ":c:" option; do
-        case "${option}" in
-            c)
-                c=${OPTARG}
-                ;;
-        esac
-    done
-    shift $((OPTIND-1))
-
-    if [ -z "${c}" ]; then
-        c="docker-php_php"
-    fi
-
+itbash() {
     cd .jefe/
-    fab it:${c}
+    docker exec -it $1 bash
     cd ..
 }
 

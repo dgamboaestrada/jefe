@@ -1,6 +1,2 @@
 *.DS_Store
 *.swp
-*.pyc
-.env
-settings.yaml
-nginx/default.conf
