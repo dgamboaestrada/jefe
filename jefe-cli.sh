@@ -335,7 +335,6 @@ deploy() {
     if [ -z "${t}" ]; then
         t="false"
     fi
-    echo $t
 
     load_dotenv
     load_settings_env $e
@@ -386,7 +385,7 @@ exec() {
     fi
 
     load_settings_env $e
-    ssh ${user}@${host} -p $port $c
+    ssh ${user}@${host} -p $port "cd ${public_dir} && $c"
 }
 
 ps() {
