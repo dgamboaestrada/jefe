@@ -165,7 +165,11 @@ create_folder_structure() {
 
 up() {
     cd .jefe/
-    docker-compose up -d
+    if [ "$1" == "-d" ]; then
+        docker-compose up -d
+    else
+        docker-compose up
+    fi
     cd ..
 }
 
