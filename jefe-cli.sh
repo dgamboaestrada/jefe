@@ -388,8 +388,18 @@ exec() {
         e="docker"
     fi
 
-    load_settings_env $e
-    ssh ${user}@${host} -p $port "cd ${public_dir} && $c"
+    if [ "$e" == "docker" ]; then
+        load_dotenv
+        if [[ "$project_type" == "php" ]]; then
+            docker exec -it ${project_name}_php $c
+        fi
+        if [[ "$project_type" == "ruby" ]]; then
+            docker exec -it ${project_name}_rails $c
+        fi
+    else
+        load_settings_env $e
+        ssh ${user}@${host} -p $port "cd ${public_dir} && $c"
+    fi
 }
 
 ps() {
@@ -468,7 +478,6 @@ configure_ruby_project() {
     read option
     flag=true
     while [ $flag = true ]; do
-        echo $option
         case $option in
             0)
                 cd ./${project_root}
