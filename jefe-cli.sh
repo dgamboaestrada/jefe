@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.2
+    echo 0.3
 }
 
 init() {
@@ -89,8 +89,9 @@ init() {
 
     # Select type of project language
     out "Select type of project language" 5
-    out "0) PHP" 5
-    out "1) Ruby" 5
+    out "0) Ruby" 5
+    out "1) PHP" 5
+    out "2) Wordpress" 5
     echo "Type the option (number) that you want(digit), followed by [ENTER]:"
     read option
 
@@ -116,6 +117,16 @@ init() {
                 # Docker compose var env configuration.
                 docker_env
                 configure_ruby_project
+                flag=false
+                ;;
+            2)
+                project_type=wordpress
+                git clone -b $project_type https://git@github.com/dgamboaestrada/wordpress.git
+                rm -rf jefe/.git
+                mv jefe .jefe
+                # Docker compose var env configuration.
+                docker_env
+                configure_project
                 flag=false
                 ;;
             *)
@@ -412,6 +423,10 @@ itbash() {
     cd ..
 }
 
+configure_project() {
+    echo "Not yet supported"
+}
+
 # configure php project
 configure_php_project() {
     create_folder_structure
@@ -583,6 +598,10 @@ help() {
     fab --list
     cd ..
 }
+
+if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+    source .jefe/jefe-cli.sh
+fi
 
 # call arguments verbatim:
 $@
