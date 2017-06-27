@@ -121,7 +121,7 @@ init() {
                 ;;
             2)
                 project_type=wordpress
-                git clone -b $project_type https://git@github.com/dgamboaestrada/wordpress.git
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
                 rm -rf jefe/.git
                 mv jefe .jefe
                 # Docker compose var env configuration.
