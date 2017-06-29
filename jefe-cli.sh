@@ -356,7 +356,7 @@ deploy() {
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
     if [ "${t}" == "true" ]; then
         set -x #echo on
-        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
     else
         set -x #echo on
         rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
