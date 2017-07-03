@@ -593,6 +593,46 @@ config_environments() {
 }
 
 
+# Update jefe cli
+update() {
+    curl -O https://raw.githubusercontent.com/dgamboaestrada/jefe/master/jefe-cli.sh
+    chmod +x jefe-cli.sh
+    sudo mv jefe-cli.sh /usr/local/bin/jefe
+    out "Updated successfully" 2
+}
+
+# Update docker compose image
+update_project() {
+    if false; then
+        load_dotenv
+        case $project_type in
+            php)
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                ;;
+            ruby)
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                ;;
+            wordpress)
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                ;;
+            *)
+                out "Wrong choice:$option" 1
+                ;;
+        esac
+        out "Stoping containers", 3
+        stop
+        rm -rf jefe/.git jefe/.gitignore
+        mv .jefe jefe-old
+        mv jefe .jefe
+        mv jefe-old/.env .jefe/.env
+        mv jefe-old/settings.yaml .jefe/settings.yaml
+        rm -rf jefe-old
+        out "Up containers", 3
+        up -d
+        out "Updated successfully" 2
+    fi
+}
+
 help() {
     cd .jefe/
     fab --list
