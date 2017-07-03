@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.3
+    echo 0.4
 }
 
 init() {
@@ -598,6 +598,8 @@ update() {
     curl -O https://raw.githubusercontent.com/dgamboaestrada/jefe/master/jefe-cli.sh
     chmod +x jefe-cli.sh
     sudo mv jefe-cli.sh /usr/local/bin/jefe
+    echo 'jefe version:'
+    jefe version
     out "Updated successfully" 2
 }
 
