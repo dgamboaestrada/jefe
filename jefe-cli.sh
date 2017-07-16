@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.3
+    echo 0.4.1
 }
 
 init() {
@@ -193,6 +193,12 @@ stop() {
 down() {
     cd .jefe/
     docker-compose down -v
+    cd ..
+}
+
+restart() {
+    cd .jefe/
+    docker-compose restart
     cd ..
 }
 
@@ -592,6 +598,42 @@ config_environments() {
     esac
 }
 
+
+# Update jefe cli
+update() {
+    curl -O https://raw.githubusercontent.com/dgamboaestrada/jefe/master/jefe-cli.sh
+    chmod +x jefe-cli.sh
+    sudo mv jefe-cli.sh /usr/local/bin/jefe
+    echo 'jefe version:'
+    jefe version
+    out "Updated successfully" 2
+}
+
+# Update docker compose image
+update_docker_compose() {
+    load_dotenv
+    case $project_type in
+        php)
+            git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+            ;;
+        ruby)
+            git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+            ;;
+        wordpress)
+            git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+            ;;
+        *)
+            out "Wrong choice:$option" 1
+            ;;
+    esac
+    rm -rf jefe/.git jefe/.gitignore jefe/git.gitignore
+    mv .jefe/.env jefe/.env
+    mv .jefe/settings.yaml jefe/settings.yaml
+    rm -rf .jefe
+    mv jefe .jefe
+    out "Reboot the containers to see the changes (jefe restart)." 3
+    out "Updated successfully." 2
+}
 
 help() {
     cd .jefe/
