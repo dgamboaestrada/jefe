@@ -337,17 +337,8 @@ drop_tables() {
 }
 
 deploy() {
-    while getopts ":e:t:" option; do
-        case "${option}" in
-            e)
-                e=${OPTARG}
-                ;;
-            t)
-                t=${OPTARG}
-                ;;
-        esac
-    done
-    shift $((OPTIND-1))
+    e=$1
+    t=$2
 
     if [ -z "${e}" ]; then
         e="docker"
@@ -415,7 +406,7 @@ exec() {
         fi
     else
         load_settings_env $e
-        ssh ${user}@${host} -p $port "cd ${public_dir} && $c"
+        ssh ${user}@${host} -p $port "bash -c 'cd ${public_dir} && $c'"
     fi
 }
 
