@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.4.1
+    echo 0.5.0
 }
 
 init() {
@@ -89,9 +89,10 @@ init() {
 
     # Select type of project language
     out "Select type of project language" 5
-    out "0) Ruby" 5
-    out "1) PHP" 5
+    out "0) PHP" 5
+    out "1) Ruby" 5
     out "2) Wordpress" 5
+    out "3) Symfony 2.x" 5
     echo "Type the option (number) that you want(digit), followed by [ENTER]:"
     read option
 
@@ -121,6 +122,16 @@ init() {
                 ;;
             2)
                 project_type=wordpress
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                rm -rf jefe/.git
+                mv jefe .jefe
+                # Docker compose var env configuration.
+                docker_env
+                configure_project
+                flag=false
+                ;;
+            3)
+                project_type=symfony
                 git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
                 rm -rf jefe/.git
                 mv jefe .jefe
@@ -165,9 +176,10 @@ create_folder_structure() {
         out "it already exists." 3
     fi
 
-    echo "Creating database directory..."
-    if [[ ! -d "./database" ]]; then
-        mkdir ./database
+    echo "Creating dumps directory..."
+    if [[ ! -d "./dumps" ]]; then
+        mkdir "./dumps"
+        touch "./dumps/.keep"
         out "done" 2
     else
         out "it already exists." 3
@@ -232,18 +244,18 @@ importdb() {
     load_dotenv
     if [[ "$e" == "docker" ]]; then
         if [[ "$project_type" == "php" ]]; then
-            docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < ./database/${f}
+            docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < ./dumps/${f}
         fi
         if [[ "$project_type" == "ruby" ]]; then
-            docker exec -i "${project_name}_db" psql -d $dbname -U $dbuser < ./database/$f
+            docker exec -i "${project_name}_db" psql -d $dbname -U $dbuser < ./dumps/$f
         fi
     else
         load_settings_env $e
         if [[ "$project_type" == "php" ]]; then
-            ssh "${user}@${host} 'mysql -u ${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./database/${f}'"
+            ssh "${user}@${host} 'mysql -u ${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${f}'"
         fi
         if [[ "$project_type" == "ruby" ]]; then
-            ssh "${user}@${host} 'psql -d $dbname -U $dbuser < ./database/$f'"
+            ssh "${user}@${host} 'psql -d $dbname -U $dbuser < ./dumps/$f'"
         fi
     fi
 }
@@ -272,18 +284,18 @@ dumpdb() {
     load_dotenv
     if [[ "$e" == "docker" ]]; then
         if [[ "$project_type" == "php" ]]; then
-            docker exec ${project_name}_db mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > ./database/${f}
+            docker exec ${project_name}_db mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > ./dumps/${f}
         fi
         if [[ "$project_type" == "ruby" ]]; then
-            docker exec "${project_name}_db" pg_dump -U $dbuser $dbname > ./database/${f}
+            docker exec "${project_name}_db" pg_dump -U $dbuser $dbname > ./dumps/${f}
         fi
     else
         load_settings_env $e
         if [[ "$project_type" == "php" ]]; then
-            ssh "${user}@${host} 'mysqldump -u ${dbuser} -p\"${dbpassword}\" ${dbname}  > ./database/${f}'"
+            ssh "${user}@${host} 'mysqldump -u ${dbuser} -p\"${dbpassword}\" ${dbname}  > ./dumps/${f}'"
         fi
         if [[ "$project_type" == "ruby" ]]; then
-            ssh "${user}@${host} 'pg_dump -U $dbuser $dbname > ./database/${f}'"
+            ssh "${user}@${host} 'pg_dump -U $dbuser $dbname > ./dumps/${f}'"
         fi
     fi
 }
@@ -421,7 +433,7 @@ itbash() {
 }
 
 configure_project() {
-    echo "Not yet supported"
+    create_folder_structure
 }
 
 # configure php project
