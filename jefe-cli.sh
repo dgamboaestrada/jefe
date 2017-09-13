@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.5.0
+    echo 0.5.1
 }
 
 init() {
@@ -164,6 +164,15 @@ init() {
 
     # Config environments.
     config_environments
+}
+
+destroy() {
+    read -p "Are you sure?[Y/n] " -n 1 -r
+    echo    # move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        rm -rf ".jefe"
+    fi
 }
 
 create_folder_structure() {
