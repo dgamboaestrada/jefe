@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.5.1
+    echo 0.5.2
 }
 
 init() {
@@ -135,6 +135,9 @@ init() {
                 git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
                 rm -rf jefe/.git
                 mv jefe .jefe
+                if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+                    source .jefe/jefe-cli.sh
+                fi
                 # Docker compose var env configuration.
                 docker_env
                 configure_project
