@@ -32,7 +32,7 @@ load_dotenv(){
     project_name=$( get_dotenv "PROJECT_NAME" )
     project_root=$( get_dotenv "PROJECT_ROOT" )
     dbname=$( get_dotenv "DB_NAME" )
-    dbuser=$( get_dotenv "DB_USERNAME" )
+    dbuser=$( get_dotenv "DB_USER" )
     dbpassword=$( get_dotenv "DB_PASSWORD" )
     dbhost=$( get_dotenv "DB_HOST" )
 }
@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.5.2
+    echo 0.5.3
 }
 
 init() {
@@ -573,9 +573,9 @@ docker_env() {
     out "Write database username (default docker):" 5
     read option
     if [ -z $option ]; then
-        set_dotenv DB_USERNAME docker
+        set_dotenv DB_USER docker
     else
-        set_dotenv DB_USERNAME $option
+        set_dotenv DB_USER $option
     fi
     out "Write database password (default docker):" 5
     read option
