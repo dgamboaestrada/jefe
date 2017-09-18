@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.5.3
+    echo 0.5.4
 }
 
 init() {
@@ -90,7 +90,7 @@ init() {
     # Select type of project language
     out "Select type of project language" 5
     out "0) PHP" 5
-    out "1) Ruby" 5
+    out "1) Ruby On Rails" 5
     out "2) Wordpress" 5
     out "3) Symfony 2.x" 5
     echo "Type the option (number) that you want(digit), followed by [ENTER]:"
@@ -111,13 +111,16 @@ init() {
                 flag=false
                 ;;
             1)
-                project_type=ruby
+                project_type=ruby-on-rails
                 git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
                 rm -rf jefe/.git
                 mv jefe .jefe
+                if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+                    source .jefe/jefe-cli.sh
+                fi
                 # Docker compose var env configuration.
                 docker_env
-                configure_ruby_project
+                configure_project
                 flag=false
                 ;;
             2)
@@ -500,45 +503,6 @@ configure_php_project() {
         esac
     done
     cp .jefe/nginx/vhosts/$project.conf .jefe/nginx/default.conf
-}
-
-# configure ruby project
-configure_ruby_project() {
-    load_dotenv
-
-    create_folder_structure
-
-    out "Create new proyect?"
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        out "Select type of project ruby" 5
-        out "0) Ripper Rails API Project" 5
-        echo "Type the option (number) that you want(digit), followed by [ENTER]:"
-        read option
-        flag=true
-        while [ $flag = true ]; do
-            case $option in
-                0)
-                    cd ./${project_root}
-                    git clone https://github.com/ricardo-pcan/ripper-rails-scaffold.git .
-                    rm -rf .git
-                    cp .circle.yml ../circle.yml
-                    rm .circle.yml
-                    rm -f ../.gitignore
-                    cp .gitignore ../.gitignore
-                    rm .gitignore
-                    cp .env.example .env
-                    cd ..
-                    flag=false
-                    ;;
-                *)
-                    out "Wrong choice:$option" 1
-                    project=""
-                    flag=true
-                    ;;
-            esac
-        done
-        cp .jefe/postinstall.sh ./$project_root/postinstall.sh
-    fi
 }
 
 # Docker compose var env configuration.
