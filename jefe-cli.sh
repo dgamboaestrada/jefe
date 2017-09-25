@@ -73,7 +73,7 @@ load_settings_env(){
 }
 
 version() {
-    echo 0.5.4
+    echo 0.5.5
 }
 
 init() {
@@ -202,12 +202,22 @@ create_folder_structure() {
 }
 
 up() {
-    cd .jefe/
-    if [ "$1" == "-d" ]; then
-        docker-compose up -d
-    else
-        docker-compose up
+    while getopts ":f:d" option; do
+        case "${option}" in
+            f)
+                f=${OPTARG}
+                ;;
+            d)
+                d='-d'
+                ;;
+        esac
+    done
+    if [ -z $f ]; then
+        f='docker-compose.yml'
     fi
+    cd .jefe/
+    echo "docker-compose -f $f up $d"
+    docker-compose -f $f up $d
     cd ..
 }
 
@@ -379,11 +389,13 @@ deploy() {
     load_settings_env $e
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
     if [ "${t}" == "true" ]; then
-        set -x #echo on
+        set -v #verbose on
         rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
+        set +v #verbose off
     else
-        set -x #echo on
+        set -v #verbose on
         rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
+        set +v #verbose off
     fi
 }
 
