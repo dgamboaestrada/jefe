@@ -19,6 +19,11 @@ out() {
     echo "$(tput setaf $color)$text $(tput sgr 0)"
 }
 
+# print  jefe version
+version() {
+    echo 0.5.6
+}
+
 set_dotenv(){
     echo "$1=$2" >> .jefe/.env
 }
@@ -72,10 +77,6 @@ load_settings_env(){
     exclude=$( get_yamlenv $1 exclude)
 }
 
-version() {
-    echo 0.5.5
-}
-
 init() {
 
     # Print logo
@@ -93,6 +94,7 @@ init() {
     out "1) Ruby On Rails" 5
     out "2) Wordpress" 5
     out "3) Symfony 2.x" 5
+    out "4) Laravel" 5
     echo "Type the option (number) that you want(digit), followed by [ENTER]:"
     read option
 
@@ -135,6 +137,19 @@ init() {
                 ;;
             3)
                 project_type=symfony
+                git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
+                rm -rf jefe/.git
+                mv jefe .jefe
+                if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+                    source .jefe/jefe-cli.sh
+                fi
+                # Docker compose var env configuration.
+                docker_env
+                configure_project
+                flag=false
+                ;;
+            4)
+                project_type=laravel
                 git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
                 rm -rf jefe/.git
                 mv jefe .jefe
