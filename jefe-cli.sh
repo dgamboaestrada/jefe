@@ -21,7 +21,7 @@ out() {
 
 # print  jefe version
 version() {
-    echo 0.5.6
+    echo 0.6.0
 }
 
 set_dotenv(){
@@ -90,7 +90,7 @@ init() {
 
     # Select type of project language
     out "Select type of project language" 5
-    out "0) PHP" 5
+    out "0) PHP-Nginx-Mysql" 5
     out "1) Ruby On Rails" 5
     out "2) Wordpress" 5
     out "3) Symfony 2.x" 5
@@ -100,16 +100,18 @@ init() {
 
     flag=true
     while [ $flag = true ]; do
-        echo $option
         case $option in
             0)
-                project_type=php
+                project_type=php-nginx-mysql
                 git clone -b $project_type https://git@github.com/dgamboaestrada/jefe.git
                 rm -rf jefe/.git
                 mv jefe .jefe
+                if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+                    source .jefe/jefe-cli.sh
+                fi
                 # Docker compose var env configuration.
                 docker_env
-                configure_php_project
+                configure_project
                 flag=false
                 ;;
             1)
@@ -254,13 +256,13 @@ restart() {
     cd ..
 }
 
-bluid() {
+build() {
     cd .jefe/
     docker-compose build --no-cache
     cd ..
 }
 
-importdb() {
+importdp() {
     while getopts ":e:f:" option; do
         case "${option}" in
             e)
