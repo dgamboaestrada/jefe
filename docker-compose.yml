@@ -1,0 +1,39 @@
+version: "2.0"
+
+services:
+  nginx:
+    build: ./nginx/
+    hostname: "${PROJECT_NAME}_nginx"
+    container_name: "${PROJECT_NAME}_nginx"
+    environment:
+      - "VIRTUAL_HOST=${VHOST}"
+      - "NGINX_PORT=${NGINX_PORT}"
+    ports:
+      - "${NGINX_PORT}:80"
+    environment:
+      NGINX_PORT: "${NGINX_PORT}"
+      VIRTUAL_HOST: "${VHOST}"
+    command: [nginx-debug, '-g', 'daemon off;']
+    networks:
+      - server
+    depends_on:
+      - jekyll
+  jekyll:
+    build: ./
+    hostname: "jekyll_${PROJECT_NAME}"
+    container_name: "jekyll_${PROJECT_NAME}"
+    working_dir: "/home/site"
+    volumes:
+      - "${PROJECT_ROOT}:/home/site"
+    expose:
+        - 4000
+    restart: on-failure
+    environment:
+      VIRTUAL_HOST: "${VHOST}"
+    command: ["bundle","install"]
+    command: ["bundle","exec","jekyll","serve","--verbose", "--host=0.0.0.0"]
+    networks:
+      - server
+
+networks:
+  server:
