@@ -1,6 +1,14 @@
 version: "2.0"
 
 services:
+   nginx-proxy:
+     image: jwilder/nginx-proxy
+     container_name: "jefe_nginx_proxy"
+     ports:
+       - "80:80"
+     volumes:
+       - /var/run/docker.sock:/tmp/docker.sock:ro
+
    db:
      image: mysql:5.7
      hostname: "db_${PROJECT_NAME}"
@@ -22,8 +30,6 @@ services:
      container_name: "wordpress_${PROJECT_NAME}"
      volumes:
        - "${PROJECT_ROOT}:/var/www/html/wp-content"
-     ports:
-       - 127.0.0.1:80:80
      restart: on-failure
      environment:
        VIRTUAL_HOST: "${VHOST}"
@@ -38,8 +44,6 @@ services:
      image: phpmyadmin/phpmyadmin
      hostname: "phpmyadmin_${PROJECT_NAME}"
      container_name: "phpmyadmin_${PROJECT_NAME}"
-     ports:
-       - 127.0.0.1:8080:80
      depends_on:
        - db
      environment:

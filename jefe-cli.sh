@@ -89,16 +89,6 @@ init() {
     config_environments
 }
 
-destroy() {
-    read -p "Are you sure?[Y/n] " -n 1 -r
-    echo    # move to a new line
-    if [[ $REPLY =~ ^[Yy]$ ]]
-    then
-        rm -rf ".jefe"
-        puts "Proyect jefe was deleted." GREEN
-    fi
-}
-
 create_folder_structure() {
     puts "Make directory structure." BLUE
     echo "Creating app directory..."
@@ -119,23 +109,71 @@ create_folder_structure() {
     fi
 }
 
+# Remove jefe_nginx_proxy container
+remove_nginx_proxy(){
+    # If jefe_nginx_proxy containr is running then stop
+    if [ "$(docker ps | grep jefe_nginx_proxy)" ]; then
+        stop_nginx_proxy
+    fi
+    puts "Removing jefe_nginx_proxy container..." BLUE
+    docker rm jefe_nginx_proxy
+    puts "Done." GREEN
+}
+
+# Create or start jefe_nginx_proxy container
+start_nginx_proxy(){
+    # If jefe_nginx_proxy containr not exist then create
+    if [ ! "$(docker ps -a | grep jefe_nginx_proxy)" ]; then
+        puts "Running jefe_nginx_proxy container..." BLUE
+        docker run -d --name jefe_nginx_proxy -p 80:80 -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy:latest
+        puts "Done." GREEN
+    else
+        puts "Starting jefe_nginx_proxy container..." BLUE
+        docker start jefe_nginx_proxy
+        puts "Done." GREEN
+    fi
+}
+
+# Stop jefe_nginx_proxy container
+stop_nginx_proxy(){
+    puts "Stoping jefe_nginx_proxy container..." BLUE
+    docker stop jefe_nginx_proxy
+    puts "Done." GREEN
+}
+
+# Remove containers of docker-compose and delete folder .jefe
+destroy() {
+    puts "The containers and its volumes are destroyed also the folder .jefe will be destroyed." RED
+    read -p "Are you sure?[Y/n] " -n 1 -r
+    echo    # move to a new line
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        down -v -f
+        rm -rf ".jefe"
+        puts "Proyect jefe was deleted." GREEN
+    fi
+}
+
 up() {
-    while getopts ":f:d" option; do
-        case "${option}" in
-            f)
-                f=${OPTARG}
-                ;;
-            d)
-                d='-d'
-                ;;
+    # set an initial value for the flag
+    DETACHED_MODE=""
+
+    # read the options
+    OPTS=`getopt -o d --long volumes,force: -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -d|--detached-mode) DETACHED_MODE="-d" ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
         esac
     done
-    if [ -z $f ]; then
-        f='docker-compose.yml'
-    fi
+
     cd .jefe/
-    echo "docker-compose -f $f up $d"
-    docker-compose -f $f up $d
+    docker-compose -f docker-compose.yml up $DETACHED_MODE
     cd ..
 }
 
@@ -145,9 +183,43 @@ stop() {
     cd ..
 }
 
+# Down container
 down() {
+    # set an initial value for the flag
+    VOLUMES=false
+    FORCE=false
+
+    # read the options
+    OPTS=`getopt -o vf --long volumes,force: -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -v|--volumes) VOLUMES=true ; shift ;;
+            -f|--force) FORCE=true ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    if $VOLUMES; then
+        v="-v"
+        if ! $FORCE; then
+            puts "The volumes are destroyed." RED
+            read -p "Are you sure?[Y/n] " -n 1 -r
+            echo    # move to a new line
+            if [[ ! $REPLY =~ ^[Yy]$ ]]
+            then
+                exit 1
+            fi
+        fi
+    fi
     cd .jefe/
-    docker-compose down -v
+    puts "Down containers." BLUE
+    docker-compose down $v
+    puts "Done." GREEN
     cd ..
 }
 
@@ -173,6 +245,7 @@ config_environments() {
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
     puts "1) Nano"
+    puts "2) Skip"
     puts "Type the option (number) from the editor that you want, followed by [ENTER]:" MAGENTA
     read option
     case $option in
@@ -181,6 +254,8 @@ config_environments() {
             ;;
         1)
             nano .jefe/environments.yaml
+            ;;
+        2)
             ;;
         *)
             vi .jefe/environments.yaml

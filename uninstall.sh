@@ -44,6 +44,16 @@ puts() {
     unset output_color
 }
 
+# Remove jefe_nginx_proxy container
+if [ "$(docker ps | grep jefe_nginx_proxy)" ]; then # If jefe_nginx_proxy containr is running then stop
+    puts "Stoping jefe_nginx_proxy container..." BLUE
+    docker stop jefe_nginx_proxy
+    puts "Done." GREEN
+fi
+puts "Removing jefe_nginx_proxy container..." BLUE
+docker rm jefe_nginx_proxy
+puts "Done." GREEN
+
 # Remove jefe alias from .zshrc file
 if [ -f ~/.zshrc ]
 then
