@@ -204,6 +204,20 @@ stop() {
     cd ..
 }
 
+# Start containers
+start() {
+    cd .jefe/
+    docker-compose start
+    cd ..
+}
+
+# Restart containers
+restart() {
+    cd .jefe/
+    docker-compose restart
+    cd ..
+}
+
 # Down container
 down() {
     # set an initial value for the flag
@@ -243,12 +257,6 @@ down() {
     puts "Done." GREEN
     cd ..
     remove_vhost
-}
-
-restart() {
-    cd .jefe/
-    docker-compose restart
-    cd ..
 }
 
 build() {

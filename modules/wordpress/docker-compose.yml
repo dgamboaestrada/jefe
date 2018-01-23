@@ -14,7 +14,7 @@ services:
      hostname: "db_${PROJECT_NAME}"
      container_name: "db_${PROJECT_NAME}"
      volumes:
-       - db_data:/var/lib/mysql
+       - db_data_wordpress:/var/lib/mysql
      restart: on-failure
      environment:
        MYSQL_ROOT_PASSWORD: password
@@ -50,5 +50,4 @@ services:
        PMA_HOST: db
        VIRTUAL_HOST: "phpmyadmin.${VHOST}"
 volumes:
-    db_data:
-
+    db_data_wordpress:
