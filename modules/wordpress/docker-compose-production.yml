@@ -1,0 +1,38 @@
+version: "2.0"
+
+services:
+   db:
+     image: mysql:5.7
+     hostname: "db_${PROJECT_NAME}"
+     container_name: "db_${PROJECT_NAME}"
+     volumes:
+       - db_data_wordpress:/var/lib/mysql
+     restart: on-failure
+     environment:
+       MYSQL_ROOT_PASSWORD: password
+       MYSQL_DATABASE: wordpress
+       MYSQL_USER: wordpress
+       MYSQL_PASSWORD: wordpress
+
+   wordpress:
+     depends_on:
+       - db
+     image: "wordpress:${WORDPRESS_VERSION}"
+     hostname: "wordpress_${PROJECT_NAME}"
+     container_name: "wordpress_${PROJECT_NAME}"
+     volumes:
+       - "${PROJECT_ROOT}:/var/www/html/wp-content"
+     ports:
+       - "80:80"
+     restart: on-failure
+     environment:
+       VIRTUAL_HOST: "${VHOST}"
+       NGINX_PORT: "${NGINX_PORT}"
+       WORDPRESS_DB_HOST: db:3306
+       WORDPRESS_DB_USER: wordpress
+       WORDPRESS_DB_PASSWORD: wordpress
+       WORDPRESS_TABLE_PREFIX: "${WORDPRESS_TABLE_PREFIX}"
+       ENVIRONMENT: "${ENVIRONMENT}"
+
+volumes:
+    db_data_wordpress:

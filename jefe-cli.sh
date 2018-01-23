@@ -5,26 +5,13 @@
 # Load utilities
 source ~/.jefe/libs/utilities.sh
 
-# Set an initial value for the flag
-version=false
-help=false
-# read the options
-OPTS=`getopt -o vh --long version,help -n 'jefe' -- "$@"`
-if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
-eval set -- "$OPTS"
-# extract options and their arguments into variables.
-while true ; do
-    case "$1" in
-        -v|--version) version ; shift ;;
-        -h|--help) echo "Comming soon..." ; shift ;;
-        --) shift ; break ;;
-        *) echo "Internal error!" ; exit 1 ;;
-    esac
-done
-
 # Print jefe version
-version(){
-    echo 1.0.0
+--version(){
+    puts "1.0.0" BLUE
+}
+# Print jefe version
+-v(){
+    --version
 }
 
 
@@ -179,7 +166,7 @@ destroy() {
     echo    # move to a new line
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
-        down -v -f
+        down -v FORCE
         rm -rf ".jefe"
         puts "Proyect jefe was deleted." GREEN
     fi
@@ -188,9 +175,10 @@ destroy() {
 up() {
     # set an initial value for the flag
     DETACHED_MODE=""
+    DOCKER_COMPOSE_FILE="docker-compose.yml"
 
     # read the options
-    OPTS=`getopt -o d --long volumes,force: -n 'jefe' -- "$@"`
+    OPTS=`getopt -o dp --long detached-mode,production -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
     eval set -- "$OPTS"
 
@@ -198,14 +186,16 @@ up() {
     while true ; do
         case "$1" in
             -d|--detached-mode) DETACHED_MODE="-d" ; shift ;;
+            -p|--production) DOCKER_COMPOSE_FILE="docker-compose-production.yml" ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
     done
 
     set_vhost
+    load_dotenv
     cd .jefe/
-    docker-compose -f docker-compose.yml up $DETACHED_MODE
+    docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up $DETACHED_MODE
     cd ..
     remove_vhost
 }
@@ -238,15 +228,21 @@ down() {
     FORCE=false
 
     # read the options
-    OPTS=`getopt -o vf --long volumes,force: -n 'jefe' -- "$@"`
+    OPTS=`getopt -o v:h --long volumes,help: -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
     eval set -- "$OPTS"
 
     # extract options and their arguments into variables.
     while true ; do
         case "$1" in
-            -v|--volumes) VOLUMES=true ; shift ;;
-            -f|--force) FORCE=true ; shift ;;
+            -v|--volumes)
+                VOLUMES=true
+                 case "$2" in
+                     force|FORCE) FORCE=true ; shift 2 ;;
+                     not_force|NOT_FORCE) FORCE=false ; shift 2 ;;
+                     *) puts "Invalid value for -v|--volume." RED ; exit 1 ; shift 2 ;;
+                 esac ;;
+            -h|--help) echo "Coming soon." ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -264,9 +260,11 @@ down() {
             fi
         fi
     fi
+
+    load_dotenv
     cd .jefe/
     puts "Down containers." BLUE
-    docker-compose down $v
+    docker-compose -p $project_name down $v
     puts "Done." GREEN
     cd ..
     remove_vhost
