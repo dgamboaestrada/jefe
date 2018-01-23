@@ -67,6 +67,17 @@ docker_env() {
     set_dotenv NGINX_PORT "80"
 }
 
+# Add vhost of /etc/hosts file
+set_vhost(){
+    if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
+        puts "Setting vhost..." BLUE
+        load_dotenv
+        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
+        sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
+        puts "Done." GREEN
+    fi
+}
+
 backup() {
     echo 'Not implemented'
 }

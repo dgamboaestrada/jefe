@@ -61,6 +61,7 @@ load_dotenv(){
     project_type=$( get_dotenv "PROJECT_TYPE" )
     project_name=$( get_dotenv "PROJECT_NAME" )
     project_root=$( get_dotenv "PROJECT_ROOT" )
+    VHOST=$( get_dotenv "VHOST" )
     dbname=$( get_dotenv "DB_NAME" )
     dbuser=$( get_dotenv "DB_USER" )
     dbpassword=$( get_dotenv "DB_PASSWORD" )

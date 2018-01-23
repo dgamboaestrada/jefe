@@ -109,6 +109,24 @@ create_folder_structure() {
     fi
 }
 
+# Add vhost of /etc/hosts file
+set_vhost(){
+    if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
+        puts "Setting vhost..." BLUE
+        load_dotenv
+        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
+        puts "Done." GREEN
+    fi
+}
+
+# Remove vhost of /etc/hosts file
+remove_vhost(){
+    puts "Removing vhost..." BLUE
+    load_dotenv
+    sudo sh -c "sed -i '/# ----- jefe-cli_$project_name/d' /etc/hosts"
+    puts "Done." GREEN
+}
+
 # Remove jefe_nginx_proxy container
 remove_nginx_proxy(){
     # If jefe_nginx_proxy containr is running then stop
@@ -172,12 +190,15 @@ up() {
         esac
     done
 
+    set_vhost
     cd .jefe/
     docker-compose -f docker-compose.yml up $DETACHED_MODE
     cd ..
+    remove_vhost
 }
 
 stop() {
+    remove_vhost
     cd .jefe/
     docker-compose stop
     cd ..
@@ -221,6 +242,7 @@ down() {
     docker-compose down $v
     puts "Done." GREEN
     cd ..
+    remove_vhost
 }
 
 restart() {
