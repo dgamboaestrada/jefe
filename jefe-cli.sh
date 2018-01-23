@@ -5,15 +5,28 @@
 # Load utilities
 source ~/.jefe/libs/utilities.sh
 
+# Set an initial value for the flag
+version=false
+help=false
+# read the options
+OPTS=`getopt -o vh --long version,help -n 'jefe' -- "$@"`
+if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+eval set -- "$OPTS"
+# extract options and their arguments into variables.
+while true ; do
+    case "$1" in
+        -v|--version) version ; shift ;;
+        -h|--help) echo "Comming soon..." ; shift ;;
+        --) shift ; break ;;
+        *) echo "Internal error!" ; exit 1 ;;
+    esac
+done
+
 # Print jefe version
-# Alias of version
--v(){
+version(){
     echo 1.0.0
 }
-# Alias of version
---version(){
-    -v
-}
+
 
 init() {
 
