@@ -382,8 +382,26 @@ ps() {
 }
 
 # Enter in bash mode iterative for the selected container.
-#TODO Create usage to itbash
 itbash() {
+    usage= cat <<EOF
+itbash [-h] [--help] <container_name>
+
+Arguments:
+    -h, --help			Print Help (this message) and exit
+EOF
+    # read the options
+    OPTS=`getopt -o h --long help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
     cd .jefe/
     docker exec -it $1 bash
     cd ..
