@@ -17,7 +17,7 @@ source ~/.jefe/libs/utilities.sh
 # Print usage.
 --help(){
     usage= cat <<EOF
-jefe [-h] [--h]
+jefe [-h] [--help]
 
 Arguments:
     -h, --help			Print Help (this message) and exit
@@ -257,14 +257,20 @@ restart() {
 }
 
 # Stop and remove containers, networks, images, and volumes.
-#TODO creato usage to down command
 down() {
+    usage= cat <<EOF
+ps [-v <option>] [--volumes <option>] [-h] [--help]
+
+Arguments:
+    -v, --volumes		Remove volumes of the proyect. Options force, not_force.
+    -h, --help			Print Help (this message) and exit
+EOF
     # set an initial value for the flag
     VOLUMES=false
     FORCE=false
 
     # read the options
-    OPTS=`getopt -o v:h --long volumes,help: -n 'jefe' -- "$@"`
+    OPTS=`getopt -o v:h --long volumes,help -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
     eval set -- "$OPTS"
 
@@ -278,7 +284,7 @@ down() {
                      not_force|NOT_FORCE) FORCE=false ; shift 2 ;;
                      *) puts "Invalid value for -v|--volume." RED ; exit 1 ; shift 2 ;;
                  esac ;;
-            -h|--help) echo "Coming soon." ; shift ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
