@@ -207,6 +207,14 @@ destroy() {
 
 # Create and start containers.
 up() {
+    usage= cat <<EOF
+up [-d] [--deleted-mode] [-p] [--production] [-h] [--help]
+
+Arguments:
+    -d, --deleted-mode		Detached mode: Run containers in the background
+    -p, --production		Run containers with production configuration
+    -h, --help			Print Help (this message) and exit
+EOF
     # set an initial value for the flag
     DETACHED_MODE=""
     DOCKER_COMPOSE_FILE="docker-compose.yml"
@@ -221,6 +229,7 @@ up() {
         case "$1" in
             -d|--detached-mode) DETACHED_MODE="-d" ; shift ;;
             -p|--production) DOCKER_COMPOSE_FILE="docker-compose-production.yml" ; shift ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
