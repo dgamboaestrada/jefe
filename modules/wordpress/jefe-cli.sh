@@ -5,7 +5,7 @@
 # Load utilities
 source ~/.jefe/libs/utilities.sh
 
-# Docker compose var env configuration.
+# Configure environments vars of docker.
 docker_env() {
     puts "Docker compose var env configuration." BLUE
     echo "" > .jefe/.env
@@ -78,10 +78,7 @@ set_vhost(){
     fi
 }
 
-backup() {
-    echo 'Not implemented'
-}
-
+# Configure environments vars of docker.
 dumpdb() {
     while getopts ":e:f:" option; do
         case "${option}" in
@@ -112,6 +109,7 @@ dumpdb() {
     fi
 }
 
+# Import dump of dumps folder of the proyect.
 import_dump() {
     while getopts ":e:f:" option; do
         case "${option}" in
@@ -143,6 +141,7 @@ import_dump() {
     fi
 }
 
+# Delete database and create empty database.
 resetdb() {
     while getopts ":e:" option; do
         case "${option}" in
@@ -166,6 +165,53 @@ resetdb() {
     fi
 }
 
+# Synchronize files to the selected environment.
+deploy() {
+    usage= cat <<EOF
+ps [-e <environment>] [--environment <environment>] [-t] [--test] [-h] [--help]
+
+Arguments:
+    -e, --environment		Set environment to deployed
+    -t, --test			Perform a test of the files to be synchronized
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    ENVIRONMENT=""
+    TEST=false
+
+    # read the options
+    OPTS=`getopt -o e:th --long environment:,test,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
+            -t|--test) TEST=true ; shift ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    load_dotenv
+    load_settings_env $ENVIRONMENT
+    excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
+    cd .jefe
+    if ! $TEST; then
+        set -x #verbose on
+        rsync -az --force --delete --progress --exclude="uploads/" --exclude="upgrade/" --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
+        set +x #verbose off
+    else
+        set -v #verbose on
+        rsync --dry-run -az --force --delete --progress --exclude="uploads/" --exclude="upgrade/" --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
+        set +v #verbose off
+    fi
+    cd ..
+}
+
+# Execute the command "composer install" in workdir folder.
 composer_install() {
     e=$1
     if [ -z "${e}" ]; then
@@ -180,6 +226,7 @@ composer_install() {
     fi
 }
 
+# Execute the command "composer update" in workdir folder.
 composer_update() {
     e=$1
     if [ -z "${e}" ]; then
@@ -192,41 +239,4 @@ composer_update() {
         load_settings_env $e
         ssh ${user}@${host} -p $port "cd ${public_dir}/; composer update"
     fi
-}
-
-deploy() {
-    while getopts ":e:t:" option; do
-        case "${option}" in
-            e)
-                e=${OPTARG}
-                ;;
-            t)
-                t=${OPTARG}
-                ;;
-        esac
-    done
-    shift $((OPTIND-1))
-
-    if [ -z "${e}" ]; then
-        e="docker"
-    fi
-
-    if [ -z "${t}" ]; then
-        t="false"
-    fi
-
-    load_dotenv
-    load_settings_env $e
-    excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
-    cd .jefe
-    if [ "${t}" == "false" ]; then
-        set -x #verbose on
-        rsync -az --force --delete --progress --exclude="uploads/" --exclude="upgrade/" --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
-        set +x #verbose off
-    else
-        set -v #verbose on
-        rsync --dry-run -az --force --delete --progress --exclude="uploads/" --exclude="upgrade/" --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
-        set +v #verbose off
-    fi
-    cd ..
 }

@@ -41,8 +41,15 @@ Commands:
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
     upgrade			Upgrade jefe-cli
+    docker_env			Configure environments vars of docker
+    dumpdb 			Configure environments vars of docker
+    import_dump			Import dump of dumps folder of the proyect
+    resetdb			Delete database and create empty database
+    deploy			Synchronize files to the selected environment
 EOF
-    echo $usage
+    if [[ -f  ".jefe/usage.txt" ]]; then
+        cat .jefe/usage.txt
+    fi
 }
 # Alias of --help.
 -h(){
@@ -119,6 +126,41 @@ init() {
 
     # Config environments.
     config_environments
+}
+
+# Configure environments vars of docker.
+# It is necessary to implement.
+docker_env() {
+    echo 'Not implemented'
+    exit 1
+}
+
+# Configure environments vars of docker.
+# It is necessary to implement.
+dumpdb() {
+    echo 'Not implemented'
+    exit 1
+}
+
+# Import dump of dumps folder of the proyect.
+# It is necessary to implement.
+import_dump() {
+    echo 'Not implemented'
+    exit 1
+}
+
+# Delete database and create a empty database.
+# It is necessary to implement.
+resetdb() {
+    echo 'Not implemented'
+    exit 1
+}
+
+# Synchronize files to the selected environment
+# It is necessary to implement.
+deploy() {
+    echo 'Not implemented'
+    exit 1
 }
 
 # Create folder structure of the project.
