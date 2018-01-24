@@ -5,58 +5,90 @@
 # Load utilities
 source ~/.jefe/libs/utilities.sh
 
-# Print jefe version
+# Print jefe version.
 --version(){
     puts "1.0.0" BLUE
 }
-# Print jefe version
+# Alias of --version.
 -v(){
     --version
 }
 
+# Print usage.
+--help(){
+    usage= cat <<EOF
+jefe [-h] [--h]
 
+Arguments:
+    -h, --help			Print Help (this message) and exit
+    -v, --version		Print version information and exit
+
+Commands:
+    init			Create an empty jefe proyect and configure project
+    create_folder_structure	Create folder structure of the proyect
+    set_vhost			Add vhost to /etc/hosts file
+    remove_vhost 		Remove vhost to /etc/hosts file
+    destroy			Remove containers of docker-compose and delete folder .jefe
+    up				Create and start containers
+    stop			Stop containers
+    start			Start containers
+    restart			Restart containers
+    down			Stop and remove containers, networks, images, and volumes
+    build			Build or rebuild services
+    config_environments		Config environments
+    docker_env			Configure docker-compose var env
+    ps				List containers
+    itbash			Enter in bash mode iterative for the selected container
+    logs			View output from containers
+    upgrade			Upgrade jefe-cli
+EOF
+    echo $usage
+}
+# Alias of --help.
+-h(){
+    --help
+}
+
+
+# Create an empty jefe proyect and configure project
 init() {
-
-    # Print logo
+    # Print logo.
     tput setaf 2;
     cat ~/.jefe/logo.txt
 
-    ###############################################################################################
-    # Configure project
-    ###############################################################################################
-    # Select type of project
+    # Select type of project.
     flag=true
     while [ $flag = true ]; do
         puts "Select type of project" BLUE
-        puts "0) PHP-Nginx-Mysql"
-        puts "1) Ruby On Rails"
-        puts "2) Wordpress"
-        puts "3) Symfony 2.x"
-        puts "4) Laravel"
+        puts "1) Wordpress"
+#         puts "2) PHP-Nginx-Mysql"
+#         puts "3) Ruby On Rails"
+#         puts "4) Symfony 2.x"
+#         puts "5) Laravel"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
         read option
 
         case $option in
-            0)
-                project_type=php-nginx-mysql
-                flag=false
-                ;;
             1)
-                project_type=ruby-on-rails
-                flag=false
-                ;;
-            2)
                 project_type=wordpress
                 flag=false
                 ;;
-            3)
-                project_type=symfony
-                flag=false
-                ;;
-            4)
-                project_type=laravel
-                flag=false
-                ;;
+#             0)
+#                 project_type=php-nginx-mysql
+#                 flag=false
+#                 ;;
+#             2)
+#                 project_type=ruby-on-rails
+#                 flag=false
+#                 ;;
+#             3)
+#                 project_type=symfony
+#                 flag=false
+#                 ;;
+#             4)
+#                 project_type=laravel
+#                 flag=false
+#                 ;;
             *)
                 puts "Wrong option" RED
                 flag=true
@@ -89,6 +121,7 @@ init() {
     config_environments
 }
 
+# Create folder structure of the project.
 create_folder_structure() {
     puts "Make directory structure." BLUE
     echo "Creating app directory..."
@@ -109,7 +142,7 @@ create_folder_structure() {
     fi
 }
 
-# Add vhost of /etc/hosts file
+# Add vhost to /etc/hosts file.
 set_vhost(){
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
@@ -119,7 +152,7 @@ set_vhost(){
     fi
 }
 
-# Remove vhost of /etc/hosts file
+# Remove vhost to /etc/hosts file.
 remove_vhost(){
     puts "Removing vhost..." BLUE
     load_dotenv
@@ -127,7 +160,7 @@ remove_vhost(){
     puts "Done." GREEN
 }
 
-# Remove jefe_nginx_proxy container
+# Remove jefe_nginx_proxy container.
 remove_nginx_proxy(){
     # If jefe_nginx_proxy containr is running then stop
     if [ "$(docker ps | grep jefe_nginx_proxy)" ]; then
@@ -138,7 +171,7 @@ remove_nginx_proxy(){
     puts "Done." GREEN
 }
 
-# Create or start jefe_nginx_proxy container
+# Create or start jefe_nginx_proxy container.
 start_nginx_proxy(){
     # If jefe_nginx_proxy containr not exist then create
     if [ ! "$(docker ps -a | grep jefe_nginx_proxy)" ]; then
@@ -152,14 +185,14 @@ start_nginx_proxy(){
     fi
 }
 
-# Stop jefe_nginx_proxy container
+# Stop jefe_nginx_proxy container.
 stop_nginx_proxy(){
     puts "Stoping jefe_nginx_proxy container..." BLUE
     docker stop jefe_nginx_proxy
     puts "Done." GREEN
 }
 
-# Remove containers of docker-compose and delete folder .jefe
+# Remove containers of docker-compose and delete folder .jefe.
 destroy() {
     puts "The containers and its volumes are destroyed also the folder .jefe will be destroyed." RED
     read -p "Are you sure?[Y/n] " -n 1 -r
@@ -172,6 +205,7 @@ destroy() {
     fi
 }
 
+# Create and start containers.
 up() {
     # set an initial value for the flag
     DETACHED_MODE=""
@@ -200,6 +234,7 @@ up() {
     remove_vhost
 }
 
+# Stop containers.
 stop() {
     remove_vhost
     cd .jefe/
@@ -221,7 +256,8 @@ restart() {
     cd ..
 }
 
-# Down container
+# Stop and remove containers, networks, images, and volumes.
+#TODO creato usage to down command
 down() {
     # set an initial value for the flag
     VOLUMES=false
@@ -270,6 +306,7 @@ down() {
     remove_vhost
 }
 
+# Build or rebuild services.
 build() {
     cd .jefe/
     docker-compose build --no-cache
@@ -304,7 +341,7 @@ config_environments() {
     esac
 }
 
-# Docker compose var env configuration.
+# Configure docker-compose var env.
 docker_env() {
     #     if [[ ! -f ".jefe/.env" ]]; then
     #         cp .jefe/default.env .jefe/.env
@@ -333,25 +370,28 @@ docker_env() {
         set_dotenv VHOST $option
     fi
 }
-
+# List containers.
 ps() {
     docker-compose ps
 }
 
+# Enter in bash mode iterative for the selected container.
+#TODO Create usage to itbash
 itbash() {
     cd .jefe/
     docker exec -it $1 bash
     cd ..
 }
 
+# View output from containers.
 logs() {
     cd ./.jefe
     docker-compose logs -f
     cd ..
 }
 
-# Update jefe cli
-update() {
+# Upgrade jefe cli
+upgrade() {
     git -C ~/.jefe fetch origin
     git -C ~/.jefe pull origin master
     puts "Updated successfully." GREEN
