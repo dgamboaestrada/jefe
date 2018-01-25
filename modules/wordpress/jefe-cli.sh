@@ -149,7 +149,7 @@ EOF
 
     load_dotenv
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i $db_{project_name} mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
+        docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
     else
         load_settings_env $ENVIRONMENT
         ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
