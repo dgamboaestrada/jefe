@@ -78,8 +78,8 @@ set_vhost(){
     fi
 }
 
-# Configure environments vars of docker.
-dumpdb() {
+# Create dump of the database of the proyect.
+dump() {
     while getopts ":e:f:" option; do
         case "${option}" in
             e)

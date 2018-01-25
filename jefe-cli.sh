@@ -41,8 +41,9 @@ Commands:
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
     upgrade			Upgrade jefe-cli
+    update			Update module of the proyect
     docker_env			Configure environments vars of docker
-    dumpdb 			Configure environments vars of docker
+    dump			Create dump of the database of the proyec
     import_dump			Import dump of dumps folder of the proyect
     resetdb			Delete database and create empty database
     deploy			Synchronize files to the selected environment
@@ -135,9 +136,9 @@ docker_env() {
     exit 1
 }
 
-# Configure environments vars of docker.
+# Create dump of the database of the proyect.
 # It is necessary to implement.
-dumpdb() {
+dump() {
     echo 'Not implemented'
     exit 1
 }
@@ -469,6 +470,19 @@ logs() {
 upgrade() {
     git -C ~/.jefe fetch origin
     git -C ~/.jefe pull origin master
+    puts "Updated successfully." GREEN
+}
+
+# Update module of the proyect
+update() {
+    # Docker compose var env configuration.
+    load_dotenv
+    cp -r ~/.jefe/modules/$project_type jefe
+    mv .jefe/.env jefe/.env
+    mv .jefe/environments.yaml jefe/environments.yaml
+    rm -rf .jefe
+    mv jefe .jefe
+    puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
 }
 
