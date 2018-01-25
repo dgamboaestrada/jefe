@@ -111,33 +111,40 @@ dumpdb() {
 
 # Import dump of dumps folder of the proyect.
 import_dump() {
-    while getopts ":e:f:" option; do
-        case "${option}" in
-            e)
-                e=${OPTARG}
-                ;;
-            f)
-                f=${OPTARG}
-                ;;
+    usage= cat <<EOF
+up [-e] [--environment] [-f] [--file] [-h] [--help]
+
+Arguments:
+    -e, --environment		Set environment to import dump
+    -f, --file			File name of dump to import (default: dump.sql)
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    ENVIRONMENT="docker"
+    FILE_NAME="dump.sql"
+
+    # read the options
+    OPTS=`getopt -o e:f:h --long environment:,file:,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
+            -f|--file) FILE_NAME=$2 ; shift 2 ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
         esac
     done
-    shift $((OPTIND-1))
-
-    if [ -z "${e}" ]; then
-        e="docker"
-    fi
-
-    if [ -z "${f}" ]; then
-        f="dump.sql"
-    fi
 
     load_dotenv
-    if [[ "$e" == "docker" ]]; then
-        echo "mysql -u${dbuser} -p"${dbpassword}" ${dbname}  < ./dumps/${f}"
-        docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${f}"
+    if [[ "$ENVIRONMENT" == "docker" ]]; then
+        docker exec -i $db_{project_name} mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
     else
-        load_settings_env $e
-        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${f}"
+        load_settings_env $ENVIRONMENT
+        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
     fi
 }
 
