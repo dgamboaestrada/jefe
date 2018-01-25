@@ -1,45 +1,6 @@
-                                                                                                    
-                                 `          :oN-     `oNNd            `+`                           
-                                dN/      :oNMNs`    `dMh/`        `+++yMh                           
-                                MMo     oMMy/`     :yMM         `oNNdyyo`                           
-                                MMo    :MM/:///////MMN+        oNNy``                               
-                                MMs  `-hMMmMNNNNNNNNNMNd/---` +MM-           `-                     
-                                :NMy:NNNNddhyyyyyyyyyyhNNmNNN/sMh          --NN-                    
-                         mm-     +NMMNdyyssssssssssssysyyyydNNNMd:`    `:hmNNNh                     
-                         hNNm`  `+MMNysssssssssssyhmNMdsssssyyymNMN: .oNMmo:.`                      
-                         `.yMm:omNNdysssssssssssyNMNNdysssssssssydMNsNMy:`                          github.com/dgamboaestrada
-                           `yMNMMhyyssssssssssssmMNyyssssssyysssssyNMMy         `.`                 
-                     .      `MMNysssssssssssssssyyysssssssdMNssssssydMN-`      `yNd                 
-                    hN+    `+MMyssssssssssssssssssssssssssdMMsssssssydNNh`   ./mMd.                 
-                    mMd   .mMNhssssssssyyssssssssssssssssshMMyssssssssyNMh /hNMd+`                  
-                    -NM+./NMmysssssssyhMMsssssssssssssssssdNNssssssssssdMM-NM+-`                    
-                     :dMNNMdysssssssymMMdssssssssyysssssssyyyssssssssssyNMNMh                       
-                      `/MMMyssssssssmNNyyssssssydNmsssssssssssssssssssssyNMM`                       
-               ::.     `MMdsssssssssyyysssssssymMMdssssssssssssssssssssssdMM:     .s-               
-               mmmdo+` hMMhsssssssssssssssssyNNMNhsssssssssshhyssssyyyssshMMo     dMd               
-               ../omMm+MMdsssssssysssssssssshNmhyssssssssssyMMdssssNNdsssdMM/....oMN-               
-                   .oMMMMysssssymNysssssssssssssssssssssssyNMNyssshMMhsssMMMymdddmd.                
-                     hyMMssssssmMMysssssssssssssssssssssssyNNyssssmNmsssyMMMMh-...`                 
-                 .`    MMysssssMMdsssssssssssssssssssssssssyysssssyyysssdMMdd`                      
-                :md/...MMdssssshdyssssssssssssssssssssssssssssssssssssshMMo`                        
-                `/mMmmmMMMdsssssssssssssssssssyhysssssssssshdysssssssssMMs                          
-                  `:o::osMMyssssssssssssssssssdMMsssssssssyMMdsssssssydMN` .//`                     
-                        `hNNmyssssssssssssssssdMMssssssssydMMysssssssdMMy--mMm`                     
-                      `/-`-hMNysssssssydysssssmMNssssssssmMMhsssssssyMMMNNNNy`                      
-                      `NMs-:MMNhysssssMMdssssshhyssssssssmNhssssssshMNhs-...                        
-                       -yNNNNmNMmsssssMMNsssssssssssssssssyssssssyhMMo`  ``                         
-                         ...-`/MMhysssdMMsssssssssssssssssssssssyNMNy--+smh                         
-                           hm:`hMMmyssyhhsssssssssyyysssssssssymMNdmNNNmd+-                         
-                           yNMmNmhMNhsssssssssssyydMNsssssssshNMm- ....`                            
-                           `-//.``hMNyyssssssssymNMNhssssssyhMMs`                                   
-                               ..`.dMMNyssssssyNMNhysssssyyNMMh``..`                                
-                               NNdmmNNNNhsssssyNNyssssssymNNmNNmmmN/                                
-                               ..:os:./MMdyysssssssssssyNMN.`:///:.                                 
-                                     ``/yNMmyssssssssyhNMmo//                                       
-                                     dddddMMNhsssysshNMNMMNmm                                       
-                                     ///yyyoMMmsssymMMy-//`                                         
-                                            :yossdmMMy/`                                            
-                                               .mMMNNNN+                                            
-                                              /NMy:`-                                               
-                                              dd+                                                   
-                                                                                                    
+     _       __      
+    | | ___ / _| ___ 
+ _  | |/ _ \ |_ / _ \
+| |_| |  __/  _|  __/
+ \___/ \___|_|  \___|
+                     
