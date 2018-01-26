@@ -157,6 +157,47 @@ EOF
     fi
 }
 
+# Update siteurl option value in wordpress database.
+set_siteurl() {
+    usage= cat <<EOF
+set_siteurl [-e] [--environment] [-H] [--host] [-h] [--help]
+
+Arguments:
+    -e, --environment		Set environment to import dump. Default is docker
+    -H, --host			Host to set. Defualt value of the VHOST configured
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    load_dotenv
+    ENVIRONMENT="docker"
+    HOST="$VHOST"
+
+    # read the options
+    OPTS=`getopt -o e:H:h --long environment:,host:,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
+            -H|--host) HOST=$2 ; shift 2 ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    WORDPRESS_TABLE_PREFIX=$( get_dotenv "WORDPRESS_TABLE_PREFIX" )
+    if [[ "$ENVIRONMENT" == "docker" ]]; then
+        docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname} -e "UPDATE ${WORDPRESS_TABLE_PREFIX}options SET option_value='http://${HOST}' WHERE option_name like 'siteurl'"
+        docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname} -e "UPDATE ${WORDPRESS_TABLE_PREFIX}options SET option_value='http://${HOST}' WHERE option_name like 'home'"
+    else
+        load_settings_env $ENVIRONMENT
+        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
+    fi
+}
+
 # Delete database and create empty database.
 resetdb() {
     while getopts ":e:" option; do

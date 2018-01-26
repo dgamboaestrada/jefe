@@ -225,7 +225,7 @@ fix_permisions(){
     load_dotenv
     puts "Setting permisions..." BLUE
     cd .jefe
-    chown -R "$USER:www-data" $project_root
+    sudo chown -R "$USER:www-data" $project_root
     cd ..
     puts "Done." GREEN
 }
