@@ -3,7 +3,7 @@
 # wordpress jefe-cli.sh
 
 # Load utilities
-source ~/.jefe/libs/utilities.sh
+source ~/.jefe-cli/libs/utilities.sh
 
 # Configure environments vars of docker.
 docker_env() {

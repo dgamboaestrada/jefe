@@ -3,7 +3,7 @@
 # version 1.0.0
 
 # Load utilities
-source ~/.jefe/libs/utilities.sh
+source ~/.jefe-cli/libs/utilities.sh
 
 # Print jefe version.
 --version(){
@@ -68,7 +68,7 @@ EOF
 init() {
     # Print logo.
     tput setaf 2;
-    cat ~/.jefe/logo.txt
+    cat ~/.jefe-cli/logo.txt
 
     # Select type of project.
     flag=true
@@ -110,7 +110,7 @@ init() {
         esac
     done
     # Docker compose var env configuration.
-    cp -r ~/.jefe/modules/$project_type .jefe
+    cp -r ~/.jefe-cli/modules/$project_type .jefe
     if [[ -f  ".jefe/jefe-cli.sh" ]]; then
         source .jefe/jefe-cli.sh
     fi
@@ -484,8 +484,8 @@ logs() {
 
 # Upgrade jefe cli
 upgrade() {
-    git -C ~/.jefe fetch origin
-    git -C ~/.jefe pull origin master
+    git -C ~/.jefe-cli fetch origin
+    git -C ~/.jefe-cli pull origin master
     puts "Updated successfully." GREEN
 }
 
@@ -493,7 +493,7 @@ upgrade() {
 update() {
     # Docker compose var env configuration.
     load_dotenv
-    cp -r ~/.jefe/modules/$project_type jefe
+    cp -r ~/.jefe-cli/modules/$project_type jefe
     mv .jefe/.env jefe/.env
     mv .jefe/environments.yaml jefe/environments.yaml
     rm -rf .jefe

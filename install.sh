@@ -52,10 +52,10 @@ if [ -f ~/.zshrc ]; then
 fi
 
 puts "Cloning repositorie..."
-git clone git@github.com:dgamboaestrada/jefe.git -b development ~/.jefe/
-chmod +x ~/.jefe/jefe-cli.sh
-chmod +x ~/.jefe/install.sh
-chmod +x ~/.jefe/uninstall.sh
+git clone git@github.com:dgamboaestrada/jefe.git -b development ~/.jefe-cli/
+chmod +x ~/.jefe-cli/jefe-cli.sh
+chmod +x ~/.jefe-cli/install.sh
+chmod +x ~/.jefe-cli/uninstall.sh
 puts "Done." GREEN
 
 # Set jefe alias in .zshrc file
@@ -63,7 +63,7 @@ if [ -f ~/.zshrc ]; then
     puts "Setting zsh configuration..."
     sed -i "/# ----- Begin jefe-cli -----/,/# ----- End jefe-cli -----/ d" ~/.zshrc
     echo "# ----- Begin jefe-cli -----" >> ~/.zshrc
-    echo "alias jefe=~/.jefe/jefe-cli.sh" >> ~/.zshrc
+    echo "alias jefe=~/.jefe-cli/jefe-cli.sh" >> ~/.zshrc
     echo "# ----- End jefe-cli -----" >> ~/.zshrc
     puts "Done." GREEN
 fi
@@ -73,7 +73,7 @@ if [ -f ~/.bashrc ]; then
     puts "Setting bash configuration..."
     sed -i "/# ----- Begin jefe-cli -----/,/# ----- End jefe-cli -----/ d" ~/.bashrc
     echo "# ----- Begin jefe-cli -----" >> ~/.bashrc
-    echo "alias jefe=~/.jefe/jefe-cli.sh" >> ~/.bashrc
+    echo "alias jefe=~/.jefe-cli/jefe-cli.sh" >> ~/.bashrc
     echo "# ----- End jefe-cli -----" >> ~/.bashrc
     puts "Done." GREEN
 fi

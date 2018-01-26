@@ -21,10 +21,15 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/dgamboaestrada/jefe/develo
 sh -c "$(wget https://raw.githubusercontent.com/dgamboaestrada/jefe/development/install.sh -O -)"
 ```
 
-#### Run project
+#### Setup new project
 ```bash
 jefe init
 ```
 
+#### Run existing project
+```bash
+jefe up
+```
+
 ## Uninstalling jefe-cli
-If you want to uninstall jefe-cli, just run `~/.jefe/uninstall.sh` from the command-line. It will remove itself and revert your previous bash or zsh configuration.
+If you want to uninstall jefe-cli, just run `~/.jefe-cli/uninstall.sh` from the command-line. It will remove itself and revert your previous bash or zsh configuration.

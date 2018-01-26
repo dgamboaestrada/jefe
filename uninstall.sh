@@ -72,6 +72,6 @@ fi
 
 # Delete instalation of jefe-cli
 puts "Deleting instalation of jefe-cli..."
-rm -rf ~/.jefe/
+rm -rf ~/.jefe-cli/
 puts "Done." GREEN
 puts "Uninstalled successfully!" GREEN
