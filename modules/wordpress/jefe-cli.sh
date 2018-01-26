@@ -79,6 +79,136 @@ set_vhost(){
     fi
 }
 
+# load container names vars
+load_containers_names(){
+    load_dotenv
+    volume_database_container_name="${project_name}_db_data"
+    database_container_name="${project_name}_db"
+    wordpress_container_name="${project_name}_wordpress"
+    phpmyadmin_container_name="${project_name}_phpmyadmin"
+}
+
+# Create and start containers.
+up(){
+    load_containers_names
+    WORDPRESS_VERSION=$( get_dotenv "WORDPRESS_VERSION" )
+    WORDPRESS_TABLE_PREFIX=$( get_dotenv "WORDPRESS_TABLE_PREFIX" )
+
+    set_vhost
+    start_nginx_proxy
+    if [ ! "$(docker volume ls | grep $volume_database_container_name)" ]; then
+        puts "Creating database volume..." BLUE
+        docker volume create $volume_database_container_name
+        puts "Done." GREEN
+    fi
+    if [ ! "$(docker ps -a | grep $database_container_name)" ]; then
+        puts "Running mysql container..." BLUE
+        docker run --name $database_container_name -v $volume_database_container_name:/var/lib/mysql -e MYSQL_ROOT_PASSWORD="password" -e MYSQL_DATABASE="wordpress" -e MYSQL_USER="wordpress" -e MYSQL_PASSWORD="wordpress" -d mysql:$WORDPRESS_VERSION
+        puts "Done." GREEN
+    else
+        puts "Starting mysql container..." BLUE
+        docker start $database_container_name
+        puts "Done." GREEN
+    fi
+
+    if [ ! "$(docker ps -a | grep $wordpress_container_name)" ]; then
+        puts "Running wordpress container..." BLUE
+        docker run --name $wordpress_container_name --link $database_container_name:"${project_name}_db" -e VIRTUAL_HOST="$VHOST" -e WORDPRESS_DB_HOST="${project_name}_db:3306" -e WORDPRESS_DB_USER="wordpress" -e WORDPRESS_DB_PASSWORD="wordpress" -e WORDPRESS_TABLE_PREFIX="${WORDPRESS_TABLE_PREFIX}" -d wordpress
+        puts "Done." GREEN
+    else
+        puts "Starting wordpress container..." BLUE
+        docker start $wordpress_container_name
+        puts "Done." GREEN
+    fi
+
+    if [ ! "$(docker ps -a | grep $phpmyadmin_container_name)" ]; then
+        puts "Running phpmyadmin container..." BLUE
+        docker run --name $phpmyadmin_container_name --link $database_container_name:"${project_name}_db" -e VIRTUAL_HOST="phpmyadmin.${VHOST}" -e PMA_HOST="${project_name}_db" -d phpmyadmin/phpmyadmin
+        puts "Done." GREEN
+    else
+        puts "Starting phpmyadmin container..." BLUE
+        docker start $phpmyadmin_container_name
+        puts "Done." GREEN
+    fi
+}
+
+# Stop containers.
+stop(){
+    load_containers_names
+    puts "Stoping containers..." BLUE
+    docker stop $wordpress_container_name $database_container_name $phpmyadmin_container_name
+    puts "Done." GREEN
+    remove_vhost
+}
+
+# Restart containers.
+restart(){
+    load_containers_names
+    puts "Restarting containers..." BLUE
+    docker restart $wordpress_container_name $database_container_name $phpmyadmin_container_name
+    puts "Done." GREEN
+    remove_vhost
+}
+
+# Remove containers and volumes.
+down(){
+    usage= cat <<EOF
+ps [-v <option>] [--volumes <option>] [-h] [--help]
+
+Arguments:
+    -v, --volumes		Specifies if the volumes are removed. Options remove, not_remove.
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    VOLUMES=false
+    VOLUMES_RM=false
+
+    # read the options
+    OPTS=`getopt -o v:h --long volumes:,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -v|--volumes)
+                VOLUMES=true
+                 case "$2" in
+                     remove|REMOVE) VOLUMES_RM=true ; shift 2 ;;
+                     not_remove|NOT_REMOVE) VOLUMES_RM=false ; shift 2 ;;
+                     *) puts "Invalid value for -v|--volume." RED ; exit 1 ; shift 2 ;;
+                 esac ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    load_containers_names
+    puts "Removing containers..." BLUE
+    echo "docker rm $v $wordpress_container_name $database_container_name $phpmyadmin_container_name"
+    docker rm $v $wordpress_container_name $database_container_name $phpmyadmin_container_name
+    puts "Done." GREEN
+
+    if ! $VOLUMES; then
+        puts "You want to remove the volumes?" RED
+        read -p "Are you sure?[Y/n] " -n 1 -r
+        echo    # move to a new line
+        if [[ $REPLY =~ ^[Yy]$ ]] ; then
+            VOLUMES_RM=true
+        fi
+    fi
+
+    if $VOLUMES_RM; then
+        puts "Removing volumes..." BLUE
+        docker volume rm $volume_database_container_name
+        puts "Done." GREEN
+    fi
+
+
+    remove_vhost
+}
+
 # Create dump of the database of the proyect.
 dump() {
     usage= cat <<EOF
