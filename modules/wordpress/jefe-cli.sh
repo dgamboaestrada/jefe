@@ -53,6 +53,8 @@ docker_env() {
     else
         set_dotenv WORDPRESS_TABLE_PREFIX $option
     fi
+
+    load_dotenv
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
     puts "Database name is wordpress" YELLOW
@@ -61,8 +63,7 @@ docker_env() {
     set_dotenv DB_USER "wordpress"
     puts "Database wordpress password is wordpress" YELLOW
     set_dotenv DB_PASSWORD "wordpress"
-    puts "phpMyAdmin url: localhost:8080" YELLOW
-    set_dotenv PHPMYADMIN_PORT "8080"
+    puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
     # Set nginx port to 80
     set_dotenv NGINX_PORT "80"
 }

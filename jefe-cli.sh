@@ -24,28 +24,34 @@ Arguments:
     -v, --version		Print version information and exit
 
 Commands:
-    init			Create an empty jefe proyect and configure project
-    create_folder_structure	Create folder structure of the proyect
-    set_vhost			Add vhost to /etc/hosts file
-    remove_vhost 		Remove vhost to /etc/hosts file
-    destroy			Remove containers of docker-compose and delete folder .jefe
-    up				Create and start containers
-    stop			Stop containers
-    start			Start containers
-    restart			Restart containers
-    down			Stop and remove containers, networks, images, and volumes
     build			Build or rebuild services
-    config_environments		Config environments
-    docker_env			Configure docker-compose var env
-    ps				List containers
+    destroy			Remove containers of docker-compose and delete folder .jefe
+    down			Stop and remove containers, networks, images, and volumes
+    fix_permisions		Fix permisions of the proyect folder
+    init			Create an empty jefe proyect and configure project
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
-    upgrade			Upgrade jefe-cli
+    ps				List containers
+    restart			Restart containers
+    start			Start containers
+    stop			Stop containers
+    up				Create and start containers
     update			Update module of the proyect
+    upgrade			Upgrade jefe-cli
+
+Settings commands:
+    config_environments		Config environments
+    create_folder_structure	Create folder structure of the proyect
     docker_env			Configure environments vars of docker
-    dump			Create dump of the database of the proyec
+    remove_vhost 		Remove vhost to /etc/hosts file
+    set_vhost			Add vhost to /etc/hosts file
+
+Database commands:
+    dump			Create dump of the database
     import_dump			Import dump of dumps folder of the proyect
     resetdb			Delete database and create empty database
+
+Deploy commands
     deploy			Synchronize files to the selected environment
 EOF
     if [[ -f  ".jefe/usage.txt" ]]; then
@@ -211,6 +217,16 @@ remove_nginx_proxy(){
     fi
     puts "Removing jefe_nginx_proxy container..." BLUE
     docker rm jefe_nginx_proxy
+    puts "Done." GREEN
+}
+
+# Fix permisions of the proyect folder
+fix_permisions(){
+    load_dotenv
+    puts "Setting permisions..." BLUE
+    cd .jefe
+    chown -R "$USER:www-data" $project_root
+    cd ..
     puts "Done." GREEN
 }
 
