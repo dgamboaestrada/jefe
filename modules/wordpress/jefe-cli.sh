@@ -21,9 +21,9 @@ docker_env() {
     puts "Write project root, directory path from your proyect (default src):" MAGENTA
     read option
     if [ -z $option ]; then
-        set_dotenv PROJECT_ROOT "../src"
+        set_dotenv PROJECT_ROOT "src/"
     else
-        set_dotenv PROJECT_ROOT "../$option"
+        set_dotenv PROJECT_ROOT "${option}/"
     fi
     puts "Write vhost (default $proyect_name.local):" MAGENTA
     read option
@@ -93,6 +93,7 @@ up(){
     load_containers_names
     WORDPRESS_VERSION=$( get_dotenv "WORDPRESS_VERSION" )
     WORDPRESS_TABLE_PREFIX=$( get_dotenv "WORDPRESS_TABLE_PREFIX" )
+    WORDPRESS_VERSION=$( get_dotenv "WORDPRESS_VERSION" )
 
     set_vhost
     start_nginx_proxy
@@ -113,7 +114,7 @@ up(){
 
     if [ ! "$(docker ps -a | grep $wordpress_container_name)" ]; then
         puts "Running wordpress container..." BLUE
-        docker run --name $wordpress_container_name --link $database_container_name:"${project_name}_db" -e VIRTUAL_HOST="$VHOST" -e WORDPRESS_DB_HOST="${project_name}_db:3306" -e WORDPRESS_DB_USER="wordpress" -e WORDPRESS_DB_PASSWORD="wordpress" -e WORDPRESS_TABLE_PREFIX="${WORDPRESS_TABLE_PREFIX}" -d wordpress
+        docker run --name $wordpress_container_name --link $database_container_name:"${project_name}_db" -e VIRTUAL_HOST="$VHOST" -e WORDPRESS_DB_HOST="${project_name}_db:3306" -e WORDPRESS_DB_USER="wordpress" -e WORDPRESS_DB_PASSWORD="wordpress" -e WORDPRESS_TABLE_PREFIX="${WORDPRESS_TABLE_PREFIX}" -v "${PROJECT_ROOT}:/var/www/html/wp-content" -d wordpress:$WORDPRESS_VERSION
         puts "Done." GREEN
     else
         puts "Starting wordpress container..." BLUE
@@ -204,7 +205,6 @@ EOF
         docker volume rm $volume_database_container_name
         puts "Done." GREEN
     fi
-
 
     remove_vhost
 }
