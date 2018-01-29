@@ -1,53 +1,48 @@
-version: "2.0"
-
+version: '2.0'
 services:
-   db:
-     image: mysql:5.7
-     container_name: "${PROJECT_NAME}_db"
-     networks:
-       - jefe-cli
-     volumes:
-       - db_data:/var/lib/mysql
-     restart: on-failure
-     environment:
-       MYSQL_ROOT_PASSWORD: password
-       MYSQL_DATABASE: wordpress
-       MYSQL_USER: wordpress
-       MYSQL_PASSWORD: wordpress
-
-   wordpress:
-     depends_on:
-       - db
-     image: "wordpress:${WORDPRESS_VERSION}"
-     container_name: "${PROJECT_NAME}_wordpress"
-     networks:
-       - jefe-cli
-     volumes:
-       - "${PROJECT_ROOT}:/var/www/html/wp-content"
-     restart: on-failure
-     environment:
-       VIRTUAL_HOST: "${VHOST}"
-       NGINX_PORT: "${NGINX_PORT}"
-       WORDPRESS_DB_HOST: db:3306
-       WORDPRESS_DB_USER: wordpress
-       WORDPRESS_DB_PASSWORD: wordpress
-       WORDPRESS_TABLE_PREFIX: "${WORDPRESS_TABLE_PREFIX}"
-       ENVIRONMENT: "${ENVIRONMENT}"
-
-   phpmyadmin:
-     image: phpmyadmin/phpmyadmin
-     container_name: "${PROJECT_NAME}_phpmyadmin"
-     networks:
-       - jefe-cli
-     depends_on:
-       - db
-     environment:
-       PMA_HOST: db
-       VIRTUAL_HOST: "phpmyadmin.${VHOST}"
-
+  db:
+    image: 'mysql:5.7'
+    container_name: '${PROJECT_NAME}_db'
+    networks:
+      - jefe-cli
+    volumes:
+      - 'db_data:/var/lib/mysql'
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+  wordpress:
+    depends_on:
+      - db
+    image: 'wordpress:${WORDPRESS_VERSION}'
+    container_name: '${PROJECT_NAME}_wordpress'
+    networks:
+      - jefe-cli
+    volumes:
+      - '${PROJECT_ROOT}:/var/www/html/wp-content'
+    restart: on-failure
+    environment:
+      VIRTUAL_HOST: '${VHOST}'
+      NGINX_PORT: '${NGINX_PORT}'
+      WORDPRESS_DB_HOST: 'db:3306'
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_TABLE_PREFIX: '${WORDPRESS_TABLE_PREFIX}'
+      ENVIRONMENT: '${ENVIRONMENT}'
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: '${PROJECT_NAME}_phpmyadmin'
+    networks:
+      - jefe-cli
+    depends_on:
+      - db
+    environment:
+      PMA_HOST: db
+      VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
 volumes:
-    db_data:
-
+  db_data: null
 networks:
   jefe-cli:
     external:
