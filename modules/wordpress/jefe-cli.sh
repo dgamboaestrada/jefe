@@ -64,8 +64,6 @@ docker_env() {
     puts "Database wordpress password is wordpress" YELLOW
     set_dotenv DB_PASSWORD "wordpress"
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
-    # Set nginx port to 80
-    set_dotenv NGINX_PORT "80"
 }
 
 # Add vhost of /etc/hosts file
@@ -166,6 +164,43 @@ EOF
     fi
 }
 
+# Delete database and create empty database.
+resetdb() {
+    usage= cat <<EOF
+resetdb [-e] [--environment] [-f] [--file] [-h] [--help]
+
+Arguments:
+    -e, --environment		Set environment to import dump. Default is docker
+    -f, --file			File name of dump to import. Defualt is dump.sql
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    ENVIRONMENT="docker"
+
+    # read the options
+    OPTS=`getopt -o e:h --long environment:,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    if [[ "$ENVIRONMENT" == "docker" ]]; then
+        load_dotenv
+        docker exec -i ${project_name}_db mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
+    else
+        load_settings_env $ENVIRONMENT
+        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} -e \"DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}\""
+    fi
+}
+
 # Update siteurl option value in wordpress database.
 set_siteurl() {
     usage= cat <<EOF
@@ -204,30 +239,6 @@ EOF
     else
         load_settings_env $ENVIRONMENT
         ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
-    fi
-}
-
-# Delete database and create empty database.
-resetdb() {
-    while getopts ":e:" option; do
-        case "${option}" in
-            e)
-                e=${OPTARG}
-                ;;
-        esac
-    done
-    shift $((OPTIND-1))
-
-    if [ -z "${e}" ]; then
-        e="docker"
-    fi
-
-    if [[ "$e" == "docker" ]]; then
-        load_dotenv
-        docker exec -i ${project_name}_db mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
-    else
-        load_settings_env $e
-        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} -e \"DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}\""
     fi
 }
 

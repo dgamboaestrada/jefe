@@ -42,7 +42,7 @@ services:
       PMA_HOST: db
       VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
 volumes:
-  db_data: null
+  db_data:
 networks:
   jefe-cli:
     external:
