@@ -75,7 +75,7 @@ init() {
     while [ $flag = true ]; do
         puts "Select type of project" BLUE
         puts "1) Wordpress"
-#         puts "2) PHP-Nginx-Mysql"
+        puts "2) PHP(Nginx-MySQL)"
 #         puts "3) Ruby On Rails"
 #         puts "4) Symfony 2.x"
 #         puts "5) Laravel"
@@ -87,10 +87,10 @@ init() {
                 project_type=wordpress
                 flag=false
                 ;;
-#             0)
-#                 project_type=php-nginx-mysql
-#                 flag=false
-#                 ;;
+            2)
+                project_type=php-nginx-mysql
+                flag=false
+                ;;
 #             2)
 #                 project_type=ruby-on-rails
 #                 flag=false
@@ -164,10 +164,49 @@ resetdb() {
 }
 
 # Synchronize files to the selected environment
-# It is necessary to implement.
 deploy() {
-    echo 'Not implemented'
-    exit 1
+    usage= cat <<EOF
+ps [-e <environment>] [--environment <environment>] [-t] [--test] [-h] [--help]
+
+Arguments:
+    -e, --environment		Set environment to deployed
+    -t, --test			Perform a test of the files to be synchronized
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    ENVIRONMENT=""
+    TEST=false
+
+    # read the options
+    OPTS=`getopt -o e:th --long environment:,test,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
+            -t|--test) TEST=true ; shift ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    load_dotenv
+    load_settings_env $ENVIRONMENT
+    excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
+    cd .jefe
+    if ! $TEST; then
+        set -x #verbose on
+        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
+        set +x #verbose off
+    else
+        set -v #verbose on
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
+        set +v #verbose off
+    fi
+    cd ..
 }
 
 # Create folder structure of the project.
@@ -305,7 +344,9 @@ EOF
     cd .jefe/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up $DETACHED_MODE
     cd ..
-    remove_vhost
+    if [ "$DETACHED_MODE" != "-d" ]; then
+        remove_vhost
+    fi
 }
 
 # Stop containers.
