@@ -1,17 +1,11 @@
 version: "2.0"
 
 services:
-   nginx-proxy:
-     image: jwilder/nginx-proxy
-     container_name: "${PROJECT_NAME}_jefe_nginx_proxy"
-     ports:
-       - "80:80"
-     volumes:
-       - /var/run/docker.sock:/tmp/docker.sock:ro
-
    db:
      image: mysql:5.7
      container_name: "${PROJECT_NAME}_db"
+     networks:
+       - jefe-cli
      volumes:
        - db_data:/var/lib/mysql
      restart: on-failure
@@ -26,6 +20,8 @@ services:
        - db
      image: "wordpress:${WORDPRESS_VERSION}"
      container_name: "${PROJECT_NAME}_wordpress"
+     networks:
+       - jefe-cli
      volumes:
        - "${PROJECT_ROOT}:/var/www/html/wp-content"
      restart: on-failure
@@ -41,10 +37,18 @@ services:
    phpmyadmin:
      image: phpmyadmin/phpmyadmin
      container_name: "${PROJECT_NAME}_phpmyadmin"
+     networks:
+       - jefe-cli
      depends_on:
        - db
      environment:
        PMA_HOST: db
        VIRTUAL_HOST: "phpmyadmin.${VHOST}"
+
 volumes:
     db_data:
+
+networks:
+  jefe-cli:
+    external:
+      name: jefe-cli
