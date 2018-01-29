@@ -52,7 +52,7 @@ if [ -f ~/.zshrc ]; then
 fi
 
 puts "Cloning repositorie..."
-git clone git@github.com:dgamboaestrada/jefe.git -b development ~/.jefe-cli/
+git clone git@github.com:dgamboaestrada/jefe.git -b master ~/.jefe-cli/
 chmod +x ~/.jefe-cli/jefe-cli.sh
 chmod +x ~/.jefe-cli/install.sh
 chmod +x ~/.jefe-cli/uninstall.sh
