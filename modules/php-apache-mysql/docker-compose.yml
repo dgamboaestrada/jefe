@@ -1,0 +1,47 @@
+version: '2'
+services:
+  php:
+    build: ./php/
+    container_name: '${PROJECT_NAME}_php'
+    networks:
+      - jefe-cli
+    environment:
+      VIRTUAL_HOST: '${VHOST}'
+      DB_HOST: '${DB_HOST}'
+      DB_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+      DB_NAME: '${DB_NAME}'
+      DB_USER: '${DB_USER}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+    volumes:
+      - '${PROJECT_ROOT}:/var/www/html'
+    depends_on:
+      - mysql
+  mysql:
+    image: 'mysql:latest'
+    container_name: '${PROJECT_NAME}_db'
+    networks:
+      - jefe-cli
+    volumes:
+      - 'db_data:/var/lib/mysql'
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
+      MYSQL_DATABASE: '${DB_NAME}'
+      MYSQL_USER: '${DB_USER}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: '${PROJECT_NAME}_phpmyadmin'
+    networks:
+      - jefe-cli
+    depends_on:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
+volumes:
+  db_data: null
+networks:
+  jefe-cli:
+    external:
+      name: jefe-cli
+

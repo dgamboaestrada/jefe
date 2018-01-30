@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# php-nginx-mysql jefe-cli.sh
+# php-apache-mysql jefe-cli.sh
 #
 
 # Load utilities
@@ -153,7 +153,7 @@ EOF
 
     load_dotenv
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i ${project_name}_mysql mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
+        docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
     else
         load_settings_env $ENVIRONMENT
         ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
@@ -190,7 +190,7 @@ EOF
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         load_dotenv
-        docker exec -i ${project_name}_mysql mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
+        docker exec -i ${project_name}_db mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
     else
         load_settings_env $ENVIRONMENT
         ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} -e \"DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}\""
