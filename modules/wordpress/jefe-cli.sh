@@ -21,9 +21,9 @@ docker_env() {
     puts "Write project root, directory path from your proyect (default src):" MAGENTA
     read option
     if [ -z $option ]; then
-        set_dotenv PROJECT_ROOT "src/"
+        set_dotenv PROJECT_ROOT "../src/"
     else
-        set_dotenv PROJECT_ROOT "${option}/"
+        set_dotenv PROJECT_ROOT "../${option}/"
     fi
     puts "Write vhost (default $proyect_name.local):" MAGENTA
     read option
@@ -32,10 +32,10 @@ docker_env() {
     else
         set_dotenv VHOST $option
     fi
-    puts "Write environment var name, (default local):" MAGENTA
+    puts "Write environment var name, (default development):" MAGENTA
     read option
     if [ -z $option ]; then
-        set_dotenv ENVIRONMENT "local"
+        set_dotenv ENVIRONMENT "development"
     else
         set_dotenv ENVIRONMENT "$option"
     fi
