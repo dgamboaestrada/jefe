@@ -7,7 +7,7 @@ source ~/.jefe-cli/libs/utilities.sh
 
 # Print jefe version.
 --version(){
-    puts "1.0.0" BLUE
+    puts "1.1.0" BLUE
 }
 # Alias of --version.
 -v(){
