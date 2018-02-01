@@ -1,6 +1,6 @@
 #!/bin/bash
 # jefe-cli
-# version 1.0.0
+# version 1.1.0
 
 # Load utilities
 source ~/.jefe-cli/libs/utilities.sh
