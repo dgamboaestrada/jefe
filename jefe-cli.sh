@@ -76,6 +76,7 @@ init() {
         puts "Select type of project" BLUE
         puts "1) Wordpress"
         puts "2) PHP(Nginx-MySQL)"
+        puts "3) PHP(Apache-MySQL)"
 #         puts "3) Ruby On Rails"
 #         puts "4) Symfony 2.x"
 #         puts "5) Laravel"
@@ -89,6 +90,10 @@ init() {
                 ;;
             2)
                 project_type=php-nginx-mysql
+                flag=false
+                ;;
+            3)
+                project_type=php-apache-mysql
                 flag=false
                 ;;
 #             2)
