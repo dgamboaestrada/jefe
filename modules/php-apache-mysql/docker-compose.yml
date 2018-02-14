@@ -1,7 +1,7 @@
 version: '2'
 services:
   php:
-    build: ./php/
+    image: 'jefecito/php:7.0-apache'
     container_name: '${PROJECT_NAME}_php'
     networks:
       - jefe-cli
@@ -12,6 +12,7 @@ services:
       DB_NAME: '${DB_NAME}'
       DB_USER: '${DB_USER}'
       DB_PASSWORD: '${DB_PASSWORD}'
+      ENVIRONMENT: '${ENVIRONMENT}'
     volumes:
       - '${PROJECT_ROOT}:/var/www/html'
     depends_on:
@@ -44,4 +45,3 @@ networks:
   jefe-cli:
     external:
       name: jefe-cli
-
