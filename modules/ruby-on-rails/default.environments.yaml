@@ -1,0 +1,23 @@
+---
+production:
+  user: user
+  group: group
+  host: example.com
+  port: 22
+  public_dir: "path/to/public/"
+  dbname: name
+  dbuser: user
+  dbpassword: password
+  dbhost: localhost
+  exclude: "*.swp;*.gitignore;*.swp;postinstall.sh;*.env;tmp/*;log/*;public/storage/*;public/assets/*"
+development:
+  user: user
+  group: group
+  host: example.com
+  port: 22
+  public_dir: "path/to/public/"
+  dbname: name
+  dbuser: user
+  dbpassword: password
+  dbhost: localhost
+  exclude: "*.swp;*.gitignore;*.swp;postinstall.sh;*.env;tmp/*;log/*;public/storage/*;public/assets/*"

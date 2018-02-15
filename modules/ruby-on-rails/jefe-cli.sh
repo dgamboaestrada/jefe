@@ -64,20 +64,6 @@ docker_env() {
     else
         set_dotenv DB_PASSWORD $option
     fi
-    puts "Database root password is password" YELLOW
-    set_dotenv DB_ROOT_PASSWORD "password"
-    puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
-}
-
-# Add vhost of /etc/hosts file
-set_vhost(){
-    if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
-        puts "Setting vhost..." BLUE
-        load_dotenv
-        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
-        sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
-        puts "Done." GREEN
-    fi
 }
 
 # Create dump of the database of the proyect.
@@ -112,10 +98,7 @@ EOF
 
     load_dotenv
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i ${project_name}_db mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > "./dumps/${FILE_NAME}"
-    else
-        load_settings_env $ENVIRONMENT
-        ssh ${user}@${host} "mysqldump -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} > ./dumps/${FILE_NAME}"
+        docker exec -it ${project_name}_rails pg_dump -U ${dbname} > "./dumps/${FILE_NAME}"
     fi
 }
 
@@ -151,10 +134,7 @@ EOF
 
     load_dotenv
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i ${project_name}_mysql mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
-    else
-        load_settings_env $ENVIRONMENT
-        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
+        docker exec -it ${project_name}_rails psql ${dbname} < "./dumps/${FILE_NAME}"
     fi
 }
 
@@ -187,37 +167,45 @@ EOF
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         load_dotenv
-        docker exec -i ${project_name}_mysql mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
-    else
-        load_settings_env $ENVIRONMENT
-        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} -e \"DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}\""
+        docker exec -it ${project_name}_rails bash -c 'rails db:migrate VERSION=0;rails db:migrate'
     fi
 }
 
-composer_install() {
-    e=$1
-    if [ -z "${e}" ]; then
-        e="docker"
-    fi
-    if [[ "$e" == "docker" ]]; then
-        load_dotenv
-        docker exec -it ${project_name}_php bash -c 'composer install'
-    else
-        load_settings_env $e
-        ssh ${user}@${host} -p $port "cd ${public_dir}/; composer install"
-    fi
+# Execute the command "bundle install" in workdir folder.
+bundle_install() {
+  e=$1
+  if [ -z "${e}" ]; then
+    e="docker"
+  fi
+
+  if [[ "$e" == "docker" ]]; then
+    load_dotenv
+    docker exec -it ${project_name}_rails bash -c 'bundle install'
+  fi
 }
 
-composer_update() {
-    e=$1
-    if [ -z "${e}" ]; then
-        e="docker"
-    fi
-    if [[ "$e" == "docker" ]]; then
-        load_dotenv
-        docker exec -it ${project_name}_php bash -c 'composer update'
-    else
-        load_settings_env $e
-        ssh ${user}@${host} -p $port "cd ${public_dir}/; composer update"
-    fi
+# Execute the command "rails db:migrate" in workdir folder. Run all rails database seeds
+migrate() {
+  e=$1
+  if [ -z "${e}" ]; then
+    e="docker"
+  fi
+
+  if [[ "$e" == "docker" ]]; then
+    load_dotenv
+    docker exec -it ${project_name}_rails bash -c 'rails db:migrate'
+  fi
+}
+
+# Execute the command "rails db:seed" in workdir folder. Run all rails database seeds
+seed() {
+  e=$1
+  if [ -z "${e}" ]; then
+    e="docker"
+  fi
+
+  if [[ "$e" == "docker" ]]; then
+    load_dotenv
+    docker exec -it ${project_name}_rails bash -c 'rails db:seed'
+  fi
 }

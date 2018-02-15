@@ -7,7 +7,7 @@ source ~/.jefe-cli/libs/utilities.sh
 
 # Print jefe version.
 --version(){
-    puts "1.1.0" BLUE
+    puts "1.3.0" BLUE
 }
 # Alias of --version.
 -v(){
@@ -55,7 +55,7 @@ Deploy commands
     deploy			Synchronize files to the selected environment
 EOF
     if [[ -f  ".jefe/usage.txt" ]]; then
-        cat .jefe/usage.txt
+        cat ~/.jefe-cli/modules/${project_type}/usage.txt
     fi
 }
 # Alias of --help.
@@ -109,6 +109,7 @@ init() {
     source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
     cp -r ~/.jefe-cli/modules/$project_type .jefe # Copy project module.
     cp ~/.jefe-cli/templates/jefe-cli.sh .jefe/jefe-cli.sh # Copy template jefe-cli.sh for custome tasks.
+    rm .jefe/usage.txt
     docker_env
     load_dotenv
     sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml

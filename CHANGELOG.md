@@ -1,6 +1,8 @@
-# Version 1.2.1
+# Version 1.3.0
 - module: Active mod_rewrite to php-apache-mysql image.
 - module: Dynamically establish the name of container services.
+- module: Add Laravel module.
+- module: Add Ruby On Rails module.
 # Version 1.2.0
 - module: Add PHP-Apache-MySQL module.
 - fix: Set correct container name of mysql to php-mysql-nginx module.

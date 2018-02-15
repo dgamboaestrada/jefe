@@ -161,11 +161,10 @@ EOF
 # Delete database and create empty database.
 resetdb() {
     usage= cat <<EOF
-resetdb [-e] [--environment] [-f] [--file] [-h] [--help]
+resetdb [-e] [--environment] [-h] [--help]
 
 Arguments:
     -e, --environment		Set environment to import dump. Default is docker
-    -f, --file			File name of dump to import. Defualt is dump.sql
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
