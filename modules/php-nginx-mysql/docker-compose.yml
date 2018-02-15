@@ -1,7 +1,7 @@
 version: '2'
 services:
   nginx:
-    build: ./nginx/
+    image: 'jefecito/nginx:php-fpm'
     container_name: '${PROJECT_NAME}_nginx'
     networks:
       - jefe-cli
@@ -16,7 +16,7 @@ services:
       - '-g'
       - 'daemon off;'
   php:
-    build: ./php/
+    image: 'jefecito/php:7.0-fpm'
     hostname: '${PROJECT_NAME}_php'
     container_name: '${PROJECT_NAME}_php'
     networks:
@@ -27,6 +27,7 @@ services:
       DB_NAME: '${DB_NAME}'
       DB_USER: '${DB_USER}'
       DB_PASSWORD: '${DB_PASSWORD}'
+      ENVIRONMENT: '${ENVIRONMENT}'
     expose:
       - 9000
     volumes:
