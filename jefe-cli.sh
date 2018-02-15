@@ -77,9 +77,9 @@ init() {
         puts "1) Wordpress"
         puts "2) PHP(Nginx-MySQL)"
         puts "3) PHP(Apache-MySQL)"
+        puts "4) Laravel"
 #         puts "3) Ruby On Rails"
 #         puts "4) Symfony 2.x"
-#         puts "5) Laravel"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
         read option
 
@@ -96,18 +96,10 @@ init() {
                 project_type=php-apache-mysql
                 flag=false
                 ;;
-#             2)
-#                 project_type=ruby-on-rails
-#                 flag=false
-#                 ;;
-#             3)
-#                 project_type=symfony
-#                 flag=false
-#                 ;;
-#             4)
-#                 project_type=laravel
-#                 flag=false
-#                 ;;
+            4)
+                project_type=laravel
+                flag=false
+                ;;
             *)
                 puts "Wrong option" RED
                 flag=true
