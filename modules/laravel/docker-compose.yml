@@ -1,6 +1,6 @@
 version: '2'
 services:
-  nginx:
+  <PROJECT_NAME>_nginx:
     image: 'jefecito/nginx:php-fpm-laravel'
     container_name: '${PROJECT_NAME}_nginx'
     networks:
@@ -10,19 +10,19 @@ services:
     volumes:
       - '${PROJECT_ROOT}:/var/www/html'
     depends_on:
-      - php
+      - <PROJECT_NAME>_php
     command:
       - nginx-debug
       - '-g'
       - 'daemon off;'
-  php:
+  <PROJECT_NAME>_php:
     image: 'jefecito/php:7.0-fpm'
     hostname: '${PROJECT_NAME}_php'
     container_name: '${PROJECT_NAME}_php'
     networks:
       - jefe-cli
     environment:
-      DB_HOST: '${DB_HOST}'
+      DB_HOST: '<PROJECT_NAME>_mysql'
       DB_ROOT_PASSWORD: '${DB_ROOT_PASSWORD}'
       DB_NAME: '${DB_NAME}'
       DB_USER: '${DB_USER}'
@@ -33,8 +33,8 @@ services:
     volumes:
       - '${PROJECT_ROOT}:/var/www/html'
     depends_on:
-      - mysql
-  mysql:
+      - <PROJECT_NAME>_mysql
+  <PROJECT_NAME>_mysql:
     image: 'mysql:latest'
     hostname: '${PROJECT_NAME}_db'
     container_name: '${PROJECT_NAME}_mysql'
@@ -47,16 +47,16 @@ services:
       MYSQL_DATABASE: '${DB_NAME}'
       MYSQL_USER: '${DB_USER}'
       MYSQL_PASSWORD: '${DB_PASSWORD}'
-  phpmyadmin:
+  <PROJECT_NAME>_phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: '${PROJECT_NAME}_phpmyadmin'
     networks:
       - jefe-cli
-    depends_on:
-      - mysql
     environment:
-      PMA_HOST: mysql
+      PMA_HOST: <PROJECT_NAME>_mysql
       VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
+    depends_on:
+      - <PROJECT_NAME>_mysql
 volumes:
   db_data: null
 networks:

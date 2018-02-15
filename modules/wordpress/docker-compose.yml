@@ -1,6 +1,6 @@
 version: '2.0'
 services:
-  db:
+  <PROJECT_NAME>_db:
     image: 'mysql:5.7'
     container_name: '${PROJECT_NAME}_db'
     networks:
@@ -13,9 +13,9 @@ services:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: wordpress
-  wordpress:
+  <PROJECT_NAME>_wordpress:
     depends_on:
-      - db
+      - <PROJECT_NAME>_db
     image: 'wordpress:${WORDPRESS_VERSION}'
     container_name: '${PROJECT_NAME}_wordpress'
     networks:
@@ -25,20 +25,20 @@ services:
     restart: on-failure
     environment:
       VIRTUAL_HOST: '${VHOST}'
-      WORDPRESS_DB_HOST: 'db:3306'
+      WORDPRESS_DB_HOST: '<PROJECT_NAME>_db:3306'
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_TABLE_PREFIX: '${WORDPRESS_TABLE_PREFIX}'
       ENVIRONMENT: '${ENVIRONMENT}'
-  phpmyadmin:
+  <PROJECT_NAME>_phpmyadmin:
+    depends_on:
+      - <PROJECT_NAME>_db
     image: phpmyadmin/phpmyadmin
     container_name: '${PROJECT_NAME}_phpmyadmin'
     networks:
       - jefe-cli
-    depends_on:
-      - db
     environment:
-      PMA_HOST: db
+      PMA_HOST: <PROJECT_NAME>_db
       VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
 volumes:
   db_data: null

@@ -27,7 +27,7 @@ Commands:
     build			Build or rebuild services
     destroy			Remove containers of docker-compose and delete folder .jefe
     down			Stop and remove containers, networks, images, and volumes
-    fix_permisions		Fix permisions of the proyect folder
+    permissions		Fix permisions of the proyect folder
     init			Create an empty jefe proyect and configure project
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
@@ -36,8 +36,8 @@ Commands:
     start			Start containers
     stop			Stop containers
     up				Create and start containers
-    update			Update module of the proyect
-    upgrade			Upgrade jefe-cli
+    update			Upgrade jefe-cli
+    update_module		Update module of the proyect
 
 Settings commands:
     config_environments		Config environments
@@ -106,12 +106,12 @@ init() {
                 ;;
         esac
     done
-    # Docker compose var env configuration.
-    cp -r ~/.jefe-cli/modules/$project_type .jefe
-    if [[ -f  ".jefe/jefe-cli.sh" ]]; then
-        source .jefe/jefe-cli.sh
-    fi
+    source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    cp -r ~/.jefe-cli/modules/$project_type .jefe # Copy project module.
+    cp ~/.jefe-cli/templates/jefe-cli.sh .jefe/jefe-cli.sh # Copy template jefe-cli.sh for custome tasks.
     docker_env
+    load_dotenv
+    sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
     create_folder_structure
 
     echo "Writing new values to .gitigonre..."
@@ -130,6 +130,7 @@ init() {
 
     # Config environments.
     config_environments
+    permissions
 }
 
 # Configure environments vars of docker.
@@ -246,9 +247,9 @@ remove_vhost(){
 }
 
 # Fix permisions of the proyect folder
-fix_permisions(){
+permissions(){
     load_dotenv
-    puts "Setting permisions..." BLUE
+    puts "Setting permissions..." BLUE
     cd .jefe
     sudo chown -R "$USER:www-data" $project_root
     cd ..
@@ -436,7 +437,7 @@ config_environments() {
     load_dotenv
     puts "Config environments.." BLUE
     if [[ ! -f ".jefe/.environments.yaml" ]]; then
-        cp .jefe/default.environments.yaml .jefe/environments.yaml
+        cp "~/.jefe-cli/modules/${project_type}/default.environments.yaml" .jefe/environments.yaml
     fi
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
@@ -527,18 +528,19 @@ logs() {
 }
 
 # Upgrade jefe cli
-upgrade() {
+update() {
     git -C ~/.jefe-cli fetch origin
     git -C ~/.jefe-cli pull origin master
     puts "Updated successfully." GREEN
 }
 
 # Update module of the proyect
-update() {
+update_module() {
     # Docker compose var env configuration.
     load_dotenv
     cp -r ~/.jefe-cli/modules/$project_type jefe
     mv .jefe/.env jefe/.env
+    mv .jefe/.jefe-cli.sh jefe/jefe-cli.sh
     mv .jefe/environments.yaml jefe/environments.yaml
     rm -rf .jefe
     mv jefe .jefe
@@ -546,8 +548,12 @@ update() {
     puts "Updated successfully." GREEN
 }
 
-if [[ -f  ".jefe/jefe-cli.sh" ]]; then
-    source .jefe/jefe-cli.sh
+if [[ -f  ".jefe/.env" ]]; then
+    load_dotenv
+    source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+        source .jefe/jefe-cli.sh
+    fi
 fi
 
 # call arguments verbatim:

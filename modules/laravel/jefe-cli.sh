@@ -64,8 +64,6 @@ docker_env() {
     else
         set_dotenv DB_PASSWORD $option
     fi
-    # Set database host to mysql (name of mysql container)
-    set_dotenv DB_HOST "mysql"
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
