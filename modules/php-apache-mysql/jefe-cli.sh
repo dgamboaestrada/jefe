@@ -90,7 +90,7 @@ Arguments:
     -f, --file			File name of dump. Default is dump.sql
     -h, --help			Print Help (this message) and exit
 EOF
-    # set an initial value for the flag
+    # set an initial value
     ENVIRONMENT="docker"
     FILE_NAME="dump.sql"
 

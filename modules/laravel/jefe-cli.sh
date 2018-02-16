@@ -69,6 +69,15 @@ docker_env() {
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
 }
 
+# load container names vars
+load_containers_names(){
+    load_dotenv
+    volume_database_container_name="${project_name}_mysql_data"
+    database_container_name="${project_name}_mysql"
+    php_container_name="${project_name}_php"
+    phpmyadmin_container_name="${project_name}_phpmyadmin"
+}
+
 # Add vhost of /etc/hosts file
 set_vhost(){
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
@@ -79,6 +88,73 @@ set_vhost(){
         puts "Done." GREEN
     fi
 }
+
+# Enter in bash mode iterative for the selected container.
+itbash(){
+    usage= cat <<EOF
+itbash [-h] [--help] <container_name>
+
+Arguments:
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value
+    CONTAINER_NAME=$1
+
+    # read the options
+    OPTS=`getopt -o h --long help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    if [ -z "${CONTAINER_NAME}" ]; then
+        load_containers_names
+        # Select type of project.
+        flag=true
+        while [ $flag = true ]; do
+            puts "Select container" BLUE
+            puts "1) $database_container_name"
+            puts "2) $php_container_name"
+            puts "3) $phpmyadmin_container_name"
+            puts "q) Quit"
+            puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
+            read option
+
+            case $option in
+                1)
+                    CONTAINER_NAME=$database_container_name
+                    flag=false
+                    ;;
+                2)
+                    CONTAINER_NAME=$php_container_name
+                    flag=false
+                    ;;
+                3)
+                    CONTAINER_NAME=$phpmyadmin_container_name
+                    flag=false
+                    ;;
+                q)
+                    exit;
+                    ;;
+                *)
+                    puts "Wrong option" RED
+                    flag=true
+                    ;;
+            esac
+        done
+    fi
+    cd .jefe/
+    docker exec -it $CONTAINER_NAME bash
+    cd ..
+}
+
 
 # Create dump of the database of the proyect.
 dump() {

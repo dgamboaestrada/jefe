@@ -1,5 +1,6 @@
 # Version 1.3.0
-- fix: Fix error do not found host in nginx by laravel module
+- module: Add select containers in itbash command for laravel module.
+- fix: Fix error do not found host in nginx by laravel module.
 - module: Add Ruby On Rails module.
 - module: Add Laravel module.
 - module: Dynamically establish the name of container services.
