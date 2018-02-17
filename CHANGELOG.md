@@ -1,3 +1,5 @@
+# Version 1.3.1
+- fix: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
 # Version 1.3.0
 - module: Add select containers in itbash command for laravel module.
 - fix: Fix error do not found host in nginx by laravel module.
