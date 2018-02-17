@@ -1,5 +1,8 @@
 # Version 1.3.1
-- fix: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
+- module: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
+- module: Fix do not working commands ps, restart, logs
+- core: Remove start command
+- core: Set detached mode as only option in up command
 # Version 1.3.0
 - module: Add select containers in itbash command for laravel module.
 - fix: Fix error do not found host in nginx by laravel module.

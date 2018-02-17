@@ -33,7 +33,6 @@ Commands:
     logs			View output from containers
     ps				List containers
     restart			Restart containers
-    start			Start containers
     stop			Stop containers
     up				Create and start containers
     update			Upgrade jefe-cli
@@ -310,15 +309,12 @@ destroy() {
 # Create and start containers.
 up() {
     usage= cat <<EOF
-up [-d] [--deleted-mode] [-p] [--production] [-h] [--help]
+up [-h] [--help]
 
 Arguments:
-    -d, --detached-mode		Detached mode: Run containers in the background
-    -p, --production		Run containers with production configuration
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
-    DETACHED_MODE=""
     DOCKER_COMPOSE_FILE="docker-compose.yml"
 
     # read the options
@@ -329,8 +325,6 @@ EOF
     # extract options and their arguments into variables.
     while true ; do
         case "$1" in
-            -d|--detached-mode) DETACHED_MODE="-d" ; shift ;;
-            -p|--production) DOCKER_COMPOSE_FILE="docker-compose-production.yml" ; shift ;;
             -h|--help) echo $usage ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
@@ -338,35 +332,28 @@ EOF
     done
 
     start_nginx_proxy
-    set_vhost
     load_dotenv
     cd .jefe/
-    docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up $DETACHED_MODE
+    docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
     cd ..
-    if [ "$DETACHED_MODE" != "-d" ]; then
-        remove_vhost
-    fi
+    set_vhost
+    permissions
 }
 
 # Stop containers.
 stop() {
     remove_vhost
+    load_dotenv
     cd .jefe/
-    docker-compose stop
-    cd ..
-}
-
-# Start containers
-start() {
-    cd .jefe/
-    docker-compose start
+    docker-compose -p $project_name stop
     cd ..
 }
 
 # Restart containers
 restart() {
+    load_dotenv
     cd .jefe/
-    docker-compose restart
+    docker-compose -p $project_name restart
     cd ..
 }
 
@@ -428,8 +415,9 @@ EOF
 
 # Build or rebuild services.
 build() {
+    load_dotenv
     cd .jefe/
-    docker-compose build --no-cache
+    docker-compose -p $project_name build --no-cache
     cd ..
 }
 
@@ -492,7 +480,10 @@ docker_env() {
 }
 # List containers.
 ps() {
-    docker-compose ps
+    load_dotenv
+    cd .jefe
+    docker-compose -p $project_name ps
+    cd ..
 }
 
 # Enter in bash mode iterative for the selected container.
@@ -523,8 +514,9 @@ EOF
 
 # View output from containers.
 logs() {
-    cd ./.jefe
-    docker-compose logs -f
+    load_dotenv
+    cd .jefe
+    docker-compose -p $project_name logs -f
     cd ..
 }
 
@@ -545,6 +537,7 @@ update_module() {
     mv .jefe/environments.yaml jefe/environments.yaml
     rm -rf .jefe
     mv jefe .jefe
+    sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
     puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
 }
