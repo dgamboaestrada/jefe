@@ -1,0 +1,40 @@
+version: '2'
+services:
+  <PROJECT_NAME>_rails:
+    image: 'jefecito/ruby:2.3.3-rails-dependencies'
+    container_name: '${PROJECT_NAME}_rails'
+    networks:
+      - jefe-cli
+    expose:
+      - 80
+    volumes:
+      - '${PROJECT_ROOT}:/myapp'
+    restart: on-failure
+    environment:
+      VIRTUAL_HOST: '${VHOST}'
+      DB_HOST: '<PROJECT_NAME>_postgresql'
+      DB_NAME: '${DB_NAME}'
+      DB_USER: '${DB_USER}'
+      DB_PASSWORD: '${DB_PASSWORD}'
+      RAILS_ENV: '${ENVIRONMENT}'
+    depends_on:
+      - '<PROJECT_NAME>_postgresql'
+  <PROJECT_NAME>_postgresql:
+    image: 'postgres:9.6'
+    container_name: '${PROJECT_NAME}_postgresql'
+    networks:
+      - jefe-cli
+    volumes:
+      - 'db_data:/var/lib/postgresql/data'
+    environment:
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_DB: "${DB_NAME}"
+
+volumes:
+  db_data: null
+networks:
+  jefe-cli:
+    external:
+      name: jefe-cli
+

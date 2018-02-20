@@ -69,6 +69,15 @@ docker_env() {
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
 }
 
+# load container names vars
+load_containers_names(){
+    load_dotenv
+    volume_database_container_name="${project_name}_mysql_data"
+    database_container_name="${project_name}_mysql"
+    php_container_name="${project_name}_php"
+    phpmyadmin_container_name="${project_name}_phpmyadmin"
+}
+
 # Add vhost of /etc/hosts file
 set_vhost(){
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
@@ -79,6 +88,73 @@ set_vhost(){
         puts "Done." GREEN
     fi
 }
+
+# Enter in bash mode iterative for the selected container.
+itbash(){
+    usage= cat <<EOF
+itbash [-h] [--help] <container_name>
+
+Arguments:
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value
+    CONTAINER_NAME=$1
+
+    # read the options
+    OPTS=`getopt -o h --long help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    if [ -z "${CONTAINER_NAME}" ]; then
+        load_containers_names
+        # Select type of project.
+        flag=true
+        while [ $flag = true ]; do
+            puts "Select container" BLUE
+            puts "1) $database_container_name"
+            puts "2) $php_container_name"
+            puts "3) $phpmyadmin_container_name"
+            puts "q) Quit"
+            puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
+            read option
+
+            case $option in
+                1)
+                    CONTAINER_NAME=$database_container_name
+                    flag=false
+                    ;;
+                2)
+                    CONTAINER_NAME=$php_container_name
+                    flag=false
+                    ;;
+                3)
+                    CONTAINER_NAME=$phpmyadmin_container_name
+                    flag=false
+                    ;;
+                q)
+                    exit;
+                    ;;
+                *)
+                    puts "Wrong option" RED
+                    flag=true
+                    ;;
+            esac
+        done
+    fi
+    cd .jefe/
+    docker exec -it $CONTAINER_NAME bash
+    cd ..
+}
+
 
 # Create dump of the database of the proyect.
 dump() {
@@ -194,6 +270,7 @@ EOF
     fi
 }
 
+# Execute the command "composer install" in workdir folder
 composer_install() {
     e=$1
     if [ -z "${e}" ]; then
@@ -208,6 +285,7 @@ composer_install() {
     fi
 }
 
+# Execute the command "composer update" in workdir folder
 composer_update() {
     e=$1
     if [ -z "${e}" ]; then
@@ -219,5 +297,58 @@ composer_update() {
     else
         load_settings_env $e
         ssh ${user}@${host} -p $port "cd ${public_dir}/; composer update"
+    fi
+}
+
+# Execute the command "php artisan migrate" in workdir folder. Running laravel migrations
+migrate() {
+    usage= cat <<EOF
+migrate [-e] [--environment] [-f] [--force] [--refresh] [--refresh-seed] [-h] [--help]
+
+Arguments:
+    -e, --environment		Set environment to import dump. Default is docker
+    -f, --force			Force Migrations to run in production (migrate
+        --refresh			Roll back all of your migrations and then execute the  migrate command
+        --refresh-seed			Roll back all of your migrations, execute the  migrate command and run all database seed
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    ENVIRONMENT="docker"
+    MIGRATE_OPTION=""
+
+    # read the options
+    OPTS=`getopt -o e:fh --long environment:,force,refresh,refresh-seed,help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    load_dotenv
+    while true ; do
+        case "$1" in
+            -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
+            -f|--force) MIGRATE_OPTION=' --force' ; shift 2 ;;
+            --refresh) MIGRATE_OPTION=':refresh' ; shift 2 ;;
+            --refresh-seed) MIGRATE_OPTION=':refresh --seed' ; shift 2 ;;
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    docker exec -it ${project_name}_php bash -c "php artisan migrate${MIGRATE_OPTION}"
+}
+
+# Execute the command "php artisan db:seed" in workdir folder. Run all laravel database seeds
+seed() {
+    e=$1
+    if [ -z "${e}" ]; then
+        e="docker"
+    fi
+    if [[ "$e" == "docker" ]]; then
+        load_dotenv
+        docker exec -it ${project_name}_php bash -c 'php artisan db:seed'
+    else
+        load_settings_env $e
+        ssh ${user}@${host} -p $port "cd ${public_dir}/; php artisan db:seed"
     fi
 }

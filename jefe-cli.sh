@@ -7,7 +7,7 @@ source ~/.jefe-cli/libs/utilities.sh
 
 # Print jefe version.
 --version(){
-    puts "1.1.0" BLUE
+    puts "1.3.1" BLUE
 }
 # Alias of --version.
 -v(){
@@ -27,17 +27,16 @@ Commands:
     build			Build or rebuild services
     destroy			Remove containers of docker-compose and delete folder .jefe
     down			Stop and remove containers, networks, images, and volumes
-    fix_permisions		Fix permisions of the proyect folder
+    permissions		Fix permisions of the proyect folder
     init			Create an empty jefe proyect and configure project
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
     ps				List containers
     restart			Restart containers
-    start			Start containers
     stop			Stop containers
     up				Create and start containers
-    update			Update module of the proyect
-    upgrade			Upgrade jefe-cli
+    update			Upgrade jefe-cli
+    update_module		Update module of the proyect
 
 Settings commands:
     config_environments		Config environments
@@ -55,7 +54,7 @@ Deploy commands
     deploy			Synchronize files to the selected environment
 EOF
     if [[ -f  ".jefe/usage.txt" ]]; then
-        cat .jefe/usage.txt
+        cat ~/.jefe-cli/modules/${project_type}/usage.txt
     fi
 }
 # Alias of --help.
@@ -77,9 +76,8 @@ init() {
         puts "1) Wordpress"
         puts "2) PHP(Nginx-MySQL)"
         puts "3) PHP(Apache-MySQL)"
-#         puts "3) Ruby On Rails"
-#         puts "4) Symfony 2.x"
-#         puts "5) Laravel"
+        puts "4) Laravel"
+        puts "5) Ruby On Rails"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
         read option
 
@@ -96,30 +94,27 @@ init() {
                 project_type=php-apache-mysql
                 flag=false
                 ;;
-#             2)
-#                 project_type=ruby-on-rails
-#                 flag=false
-#                 ;;
-#             3)
-#                 project_type=symfony
-#                 flag=false
-#                 ;;
-#             4)
-#                 project_type=laravel
-#                 flag=false
-#                 ;;
+            4)
+                project_type=laravel
+                flag=false
+                ;;
+            5)
+                project_type=ruby-on-rails
+                flag=false
+                ;;
             *)
                 puts "Wrong option" RED
                 flag=true
                 ;;
         esac
     done
-    # Docker compose var env configuration.
-    cp -r ~/.jefe-cli/modules/$project_type .jefe
-    if [[ -f  ".jefe/jefe-cli.sh" ]]; then
-        source .jefe/jefe-cli.sh
-    fi
+    source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    cp -r ~/.jefe-cli/modules/$project_type .jefe # Copy project module.
+    cp ~/.jefe-cli/templates/jefe-cli.sh .jefe/jefe-cli.sh # Copy template jefe-cli.sh for custome tasks.
+    rm .jefe/usage.txt
     docker_env
+    load_dotenv
+    sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
     create_folder_structure
 
     echo "Writing new values to .gitigonre..."
@@ -138,6 +133,7 @@ init() {
 
     # Config environments.
     config_environments
+    permissions
 }
 
 # Configure environments vars of docker.
@@ -254,9 +250,9 @@ remove_vhost(){
 }
 
 # Fix permisions of the proyect folder
-fix_permisions(){
+permissions(){
     load_dotenv
-    puts "Setting permisions..." BLUE
+    puts "Setting permissions..." BLUE
     cd .jefe
     sudo chown -R "$USER:www-data" $project_root
     cd ..
@@ -316,15 +312,12 @@ destroy() {
 # Create and start containers.
 up() {
     usage= cat <<EOF
-up [-d] [--deleted-mode] [-p] [--production] [-h] [--help]
+up [-h] [--help]
 
 Arguments:
-    -d, --detached-mode		Detached mode: Run containers in the background
-    -p, --production		Run containers with production configuration
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
-    DETACHED_MODE=""
     DOCKER_COMPOSE_FILE="docker-compose.yml"
 
     # read the options
@@ -335,8 +328,6 @@ EOF
     # extract options and their arguments into variables.
     while true ; do
         case "$1" in
-            -d|--detached-mode) DETACHED_MODE="-d" ; shift ;;
-            -p|--production) DOCKER_COMPOSE_FILE="docker-compose-production.yml" ; shift ;;
             -h|--help) echo $usage ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
@@ -344,35 +335,28 @@ EOF
     done
 
     start_nginx_proxy
-    set_vhost
     load_dotenv
     cd .jefe/
-    docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up $DETACHED_MODE
+    docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
     cd ..
-    if [ "$DETACHED_MODE" != "-d" ]; then
-        remove_vhost
-    fi
+    set_vhost
+    permissions
 }
 
 # Stop containers.
 stop() {
     remove_vhost
+    load_dotenv
     cd .jefe/
-    docker-compose stop
-    cd ..
-}
-
-# Start containers
-start() {
-    cd .jefe/
-    docker-compose start
+    docker-compose -p $project_name stop
     cd ..
 }
 
 # Restart containers
 restart() {
+    load_dotenv
     cd .jefe/
-    docker-compose restart
+    docker-compose -p $project_name restart
     cd ..
 }
 
@@ -434,8 +418,9 @@ EOF
 
 # Build or rebuild services.
 build() {
+    load_dotenv
     cd .jefe/
-    docker-compose build --no-cache
+    docker-compose -p $project_name build --no-cache
     cd ..
 }
 
@@ -444,7 +429,7 @@ config_environments() {
     load_dotenv
     puts "Config environments.." BLUE
     if [[ ! -f ".jefe/.environments.yaml" ]]; then
-        cp .jefe/default.environments.yaml .jefe/environments.yaml
+        cp "~/.jefe-cli/modules/${project_type}/default.environments.yaml" .jefe/environments.yaml
     fi
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
@@ -498,7 +483,10 @@ docker_env() {
 }
 # List containers.
 ps() {
-    docker-compose ps
+    load_dotenv
+    cd .jefe
+    docker-compose -p $project_name ps
+    cd ..
 }
 
 # Enter in bash mode iterative for the selected container.
@@ -529,33 +517,40 @@ EOF
 
 # View output from containers.
 logs() {
-    cd ./.jefe
-    docker-compose logs -f
+    load_dotenv
+    cd .jefe
+    docker-compose -p $project_name logs -f
     cd ..
 }
 
 # Upgrade jefe cli
-upgrade() {
+update() {
     git -C ~/.jefe-cli fetch origin
     git -C ~/.jefe-cli pull origin master
     puts "Updated successfully." GREEN
 }
 
 # Update module of the proyect
-update() {
+update_module() {
     # Docker compose var env configuration.
     load_dotenv
     cp -r ~/.jefe-cli/modules/$project_type jefe
     mv .jefe/.env jefe/.env
+    mv .jefe/.jefe-cli.sh jefe/jefe-cli.sh
     mv .jefe/environments.yaml jefe/environments.yaml
     rm -rf .jefe
     mv jefe .jefe
+    sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
     puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
 }
 
-if [[ -f  ".jefe/jefe-cli.sh" ]]; then
-    source .jefe/jefe-cli.sh
+if [[ -f  ".jefe/.env" ]]; then
+    load_dotenv
+    source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    if [[ -f  ".jefe/jefe-cli.sh" ]]; then
+        source .jefe/jefe-cli.sh
+    fi
 fi
 
 # call arguments verbatim:

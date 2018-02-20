@@ -103,3 +103,11 @@ load_settings_env(){
     exclude=$( get_yamlenv $1 exclude)
 }
 
+function_exists() {
+    declare -f $1 > /dev/null
+    if [ $? == 0 ]; then
+        echo true
+    else
+        echo false
+    fi
+}

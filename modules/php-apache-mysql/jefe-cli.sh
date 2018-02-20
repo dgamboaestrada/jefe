@@ -64,8 +64,6 @@ docker_env() {
     else
         set_dotenv DB_PASSWORD $option
     fi
-    # Set database host to mysql (name of mysql container)
-    set_dotenv DB_HOST "mysql"
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
@@ -92,7 +90,7 @@ Arguments:
     -f, --file			File name of dump. Default is dump.sql
     -h, --help			Print Help (this message) and exit
 EOF
-    # set an initial value for the flag
+    # set an initial value
     ENVIRONMENT="docker"
     FILE_NAME="dump.sql"
 
@@ -163,11 +161,10 @@ EOF
 # Delete database and create empty database.
 resetdb() {
     usage= cat <<EOF
-resetdb [-e] [--environment] [-f] [--file] [-h] [--help]
+resetdb [-e] [--environment] [-h] [--help]
 
 Arguments:
     -e, --environment		Set environment to import dump. Default is docker
-    -f, --file			File name of dump to import. Defualt is dump.sql
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
