@@ -3,6 +3,7 @@
 - module: Fix do not working commands ps, restart, logs
 - core: Remove start command
 - core: Set detached mode as only option in up command
+- core: Add option ruby on rails in selected option
 # Version 1.3.0
 - module: Add select containers in itbash command for laravel module.
 - fix: Fix error do not found host in nginx by laravel module.

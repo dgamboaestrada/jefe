@@ -7,7 +7,7 @@ source ~/.jefe-cli/libs/utilities.sh
 
 # Print jefe version.
 --version(){
-    puts "1.3.0" BLUE
+    puts "1.3.1" BLUE
 }
 # Alias of --version.
 -v(){
@@ -77,8 +77,7 @@ init() {
         puts "2) PHP(Nginx-MySQL)"
         puts "3) PHP(Apache-MySQL)"
         puts "4) Laravel"
-#         puts "3) Ruby On Rails"
-#         puts "4) Symfony 2.x"
+        puts "5) Ruby On Rails"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
         read option
 
@@ -97,6 +96,10 @@ init() {
                 ;;
             4)
                 project_type=laravel
+                flag=false
+                ;;
+            5)
+                project_type=ruby-on-rails
                 flag=false
                 ;;
             *)
