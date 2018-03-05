@@ -7,7 +7,7 @@ services:
       - jefe-cli
     environment:
       VIRTUAL_HOST: '${VHOST}'
-      ROOT: '/var/www/html'
+      ROOT: '${DOCUMENT_ROOT}'
       UPSTREAM: '<PROJECT_NAME>_php'
     volumes:
       - '${PROJECT_ROOT}:/var/www/html'

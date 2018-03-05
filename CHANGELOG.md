@@ -1,3 +1,5 @@
+# Version 1.3.2
+- module: Remove laravel module and it si added as framework into php-nginx-mysql module.
 # Version 1.3.1
 - module: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
 - module: Fix do not working commands ps, restart, logs

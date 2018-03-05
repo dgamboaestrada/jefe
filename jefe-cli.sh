@@ -2,8 +2,11 @@
 # jefe-cli
 # version 1.1.0
 
+# Define constants
+ROOT_DIRECTORY=~/.jefe-cli
+
 # Load utilities
-source ~/.jefe-cli/libs/utilities.sh
+source $ROOT_DIRECTORY/libs/utilities.sh
 
 # Print jefe version.
 --version(){
@@ -53,8 +56,9 @@ Database commands:
 Deploy commands
     deploy			Synchronize files to the selected environment
 EOF
-    if [[ -f  ".jefe/usage.txt" ]]; then
-        cat ~/.jefe-cli/modules/${project_type}/usage.txt
+    usage_module=$ROOT_DIRECTORY/modules/${project_type}/usage.txt
+    if [[ -f  "$usage_module" ]]; then
+        cat $usage_module
     fi
 }
 # Alias of --help.
@@ -76,8 +80,7 @@ init() {
         puts "1) Wordpress"
         puts "2) PHP(Nginx-MySQL)"
         puts "3) PHP(Apache-MySQL)"
-        puts "4) Laravel"
-        puts "5) Ruby On Rails"
+        puts "4) Ruby On Rails"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
         read option
 
@@ -95,10 +98,6 @@ init() {
                 flag=false
                 ;;
             4)
-                project_type=laravel
-                flag=false
-                ;;
-            5)
                 project_type=ruby-on-rails
                 flag=false
                 ;;
@@ -133,7 +132,6 @@ init() {
 
     # Config environments.
     config_environments
-    permissions
 }
 
 # Configure environments vars of docker.
