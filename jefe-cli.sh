@@ -107,10 +107,10 @@ init() {
                 ;;
         esac
     done
+    mkdir .jefe
     source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
-    cp -r ~/.jefe-cli/modules/$project_type .jefe # Copy project module.
-    cp ~/.jefe-cli/templates/jefe-cli.sh .jefe/jefe-cli.sh # Copy template jefe-cli.sh for custome tasks.
-    rm .jefe/usage.txt
+    cp ~/.jefe-cli/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
+    cp ~/.jefe-cli/templates/environments.yaml .jefe/environments.yaml # Copy template jefe-cli.sh for custome tasks.
     docker_env
     load_dotenv
     sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
@@ -348,6 +348,7 @@ stop() {
     cd .jefe/
     docker-compose -p $project_name stop
     cd ..
+#     docker stop $(docker ps -a -q)
 }
 
 # Restart containers
@@ -532,12 +533,7 @@ update() {
 update_module() {
     # Docker compose var env configuration.
     load_dotenv
-    cp -r ~/.jefe-cli/modules/$project_type jefe
-    mv .jefe/.env jefe/.env
-    mv .jefe/.jefe-cli.sh jefe/jefe-cli.sh
-    mv .jefe/environments.yaml jefe/environments.yaml
-    rm -rf .jefe
-    mv jefe .jefe
+    cp ~/.jefe-cli/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
     sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
     puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
