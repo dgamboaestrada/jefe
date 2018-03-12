@@ -6,10 +6,10 @@
 # Docker compose var env configuration.
 docker_env() {
     puts "Docker compose var env configuration." BLUE
-    #     if [[ ! -f ".jefe/.env" ]]; then
-    #         cp .jefe/default.env .jefe/.env
+    #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
+    #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
     #     fi
-    echo "" > .jefe/.env
+    echo "" > $PROYECT_DIR/.env
     set_dotenv PROJECT_TYPE $project_type
     puts "Write project name (default $project_type):" MAGENTA
     read proyect_name

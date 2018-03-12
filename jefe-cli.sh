@@ -4,6 +4,7 @@
 
 # Get root dir of the jefe-cli bash script
 DIR="$(dirname "$(readlink -f "$0")")"
+PROYECT_DIR="$PWD/.jefe"
 
 # Load utilities
 source $DIR/libs/utilities.sh
@@ -107,18 +108,18 @@ init() {
                 ;;
         esac
     done
-    mkdir .jefe
+    mkdir $PROYECT_DIR
     source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
-    cp $DIR/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
-    cp $DIR/templates/environments.yaml .jefe/environments.yaml # Copy template jefe-cli.sh for custome tasks.
+    cp $DIR/modules/${project_type}/docker-compose.yml $PROYECT_DIR/docker-compose.yml # Copy docker-compose configuration.
+    cp $DIR/templates/environments.yaml $PROYECT_DIR/environments.yaml # Copy template jefe-cli.sh for custome tasks.
     docker_env
     load_dotenv
-    sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
+    sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
     create_folder_structure
 
     echo "Writing new values to .gitigonre..."
     if [[ ! -f  "./.gitignore" ]]; then
-        cat .jefe/git.gitignore >> ./.gitignore
+        cat $PROYECT_DIR/git.gitignore >> ./.gitignore
         puts "it already exists." YELLOW
     else
         while read line
@@ -126,7 +127,7 @@ init() {
             if ! grep -q "$line"  "./.gitignore"; then
                 echo "$line" >> ./.gitignore
             fi
-        done < .jefe/git.gitignore
+        done < $PROYECT_DIR/git.gitignore
         puts "it already exists." YELLOW
     fi
 
@@ -195,7 +196,7 @@ EOF
     load_dotenv
     load_settings_env $ENVIRONMENT
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
-    cd .jefe
+    cd $PROYECT_DIR
     if ! $TEST; then
         set -x #verbose on
         rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
@@ -255,7 +256,7 @@ remove_vhost(){
 permissions(){
     load_dotenv
     puts "Setting permissions..." BLUE
-    cd .jefe
+    cd $PROYECT_DIR
     sudo chown -R "$USER:www-data" $project_root
     cd ..
     puts "Done." GREEN
@@ -306,7 +307,7 @@ destroy() {
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
         down -v FORCE
-        rm -rf ".jefe"
+        rm -rf "$PROYECT_DIR"
         puts "Proyect jefe was deleted." GREEN
     fi
 }
@@ -338,7 +339,7 @@ EOF
 
     start_nginx_proxy
     load_dotenv
-    cd .jefe/
+    cd $PROYECT_DIR/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
     cd ..
     set_vhost
@@ -349,7 +350,7 @@ EOF
 stop() {
     remove_vhost
     load_dotenv
-    cd .jefe/
+    cd $PROYECT_DIR/
     docker-compose -p $project_name stop
     cd ..
 #     docker stop $(docker ps -a -q)
@@ -358,7 +359,7 @@ stop() {
 # Restart containers
 restart() {
     load_dotenv
-    cd .jefe/
+    cd $PROYECT_DIR/
     docker-compose -p $project_name restart
     cd ..
     set_vhost
@@ -412,7 +413,7 @@ EOF
     fi
 
     load_dotenv
-    cd .jefe/
+    cd $PROYECT_DIR/
     puts "Down containers." BLUE
     docker-compose -p $project_name down $v
     puts "Done." GREEN
@@ -423,7 +424,7 @@ EOF
 # Build or rebuild services.
 build() {
     load_dotenv
-    cd .jefe/
+    cd $PROYECT_DIR/
     docker-compose -p $project_name build --no-cache
     cd ..
 }
@@ -432,8 +433,8 @@ build() {
 config_environments() {
     load_dotenv
     puts "Config environments.." BLUE
-    if [[ ! -f ".jefe/.environments.yaml" ]]; then
-        cp "$DIR/modules/${project_type}/default.environments.yaml" .jefe/environments.yaml
+    if [[ ! -f "$PROYECT_DIR/.environments.yaml" ]]; then
+        cp "$DIR/modules/${project_type}/default.environments.yaml" $PROYECT_DIR/environments.yaml
     fi
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
@@ -443,25 +444,25 @@ config_environments() {
     read option
     case $option in
         0)
-            vi .jefe/environments.yaml
+            vi $PROYECT_DIR/environments.yaml
             ;;
         1)
-            nano .jefe/environments.yaml
+            nano $PROYECT_DIR/environments.yaml
             ;;
         2)
             ;;
         *)
-            vi .jefe/environments.yaml
+            vi $PROYECT_DIR/environments.yaml
             ;;
     esac
 }
 
 # Configure docker-compose var env.
 docker_env() {
-    #     if [[ ! -f ".jefe/.env" ]]; then
-    #         cp .jefe/default.env .jefe/.env
+    #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
+    #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
     #     fi
-    echo "" > .jefe/.env
+    echo "" > $PROYECT_DIR/.env
     set_dotenv PROJECT_TYPE $project_type
     puts "Write project name (default $project_type):" MAGENTA
     read proyect_name
@@ -488,7 +489,7 @@ docker_env() {
 # List containers.
 ps() {
     load_dotenv
-    cd .jefe
+    cd $PROYECT_DIR
     docker-compose -p $project_name ps
     cd ..
 }
@@ -514,7 +515,7 @@ EOF
             *) echo "Internal error!" ; exit 1 ;;
         esac
     done
-    cd .jefe/
+    cd $PROYECT_DIR/
     docker exec -it $1 bash
     cd ..
 }
@@ -522,7 +523,7 @@ EOF
 # View output from containers.
 logs() {
     load_dotenv
-    cd .jefe
+    cd $PROYECT_DIR
     docker-compose -p $project_name logs -f
     cd ..
 }
@@ -538,17 +539,17 @@ update() {
 update_module() {
     # Docker compose var env configuration.
     load_dotenv
-    cp $DIR/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
-    sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
+    cp $DIR/modules/${project_type}/docker-compose.yml $PROYECT_DIR/docker-compose.yml # Copy docker-compose configuration.
+    sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
     puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
 }
 
-if [[ -f  ".jefe/.env" ]]; then
+if [[ -f  "$PROYECT_DIR/.env" ]]; then
     load_dotenv
     source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
-    if [[ -f  ".jefe/jefe-cli.sh" ]]; then
-        source .jefe/jefe-cli.sh
+    if [[ -f  "$PROYECT_DIR/jefe-cli.sh" ]]; then
+        source $PROYECT_DIR/jefe-cli.sh
     fi
 fi
 
