@@ -1,6 +1,6 @@
 #!/bin/bash
 # jefe-cli
-# version 1.1.0
+# version 1.3.2
 
 # Get root dir of the jefe-cli bash script
 DIR="$(dirname "$(readlink -f "$0")")"
@@ -11,7 +11,7 @@ source $DIR/libs/utilities.sh
 
 # Print jefe version.
 --version(){
-    puts "1.3.2-beta" BLUE
+    puts "1.3.2" BLUE
 }
 # Alias of --version.
 -v(){
