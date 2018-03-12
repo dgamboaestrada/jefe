@@ -2,6 +2,7 @@
 - module: Remove laravel module and it si added as framework into php-nginx-mysql module.
 - fix: Set correct name of rails image for ruby-on-rails module.
 - core: Remove default.environments.yaml of modules an create a template for all modules.
+- core: Add support for multivhost.
 # Version 1.3.1
 - module: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
 - module: Fix do not working commands ps, restart, logs

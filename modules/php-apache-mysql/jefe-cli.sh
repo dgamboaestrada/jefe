@@ -71,11 +71,15 @@ docker_env() {
 
 # Add vhost of /etc/hosts file
 set_vhost(){
+    remove_vhost # Remove old vhost
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         load_dotenv
-        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
-        sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
+        hosts="$( echo "$VHOST" | tr ',' ' ' )"
+        for host in $hosts; do
+            sudo sh -c "echo '127.0.0.1     $host # ----- jefe-cli_$project_name' >> /etc/hosts"
+            sudo sh -c "echo '127.0.0.1     phpmyadmin.$host # ----- jefe-cli_$project_name' >> /etc/hosts"
+        done
         puts "Done." GREEN
     fi
 }

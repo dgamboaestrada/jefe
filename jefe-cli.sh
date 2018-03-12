@@ -10,7 +10,7 @@ source $ROOT_DIRECTORY/libs/utilities.sh
 
 # Print jefe version.
 --version(){
-    puts "1.3.1" BLUE
+    puts "1.3.2-beta" BLUE
 }
 # Alias of --version.
 -v(){
@@ -231,10 +231,14 @@ create_folder_structure() {
 
 # Add vhost to /etc/hosts file.
 set_vhost(){
+    remove_vhost # Remove old vhost
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         load_dotenv
-        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
+        hosts="$( echo "$VHOST" | tr ',' ' ' )"
+        for host in $hosts; do
+            sudo sh -c "echo '127.0.0.1     $host # ----- jefe-cli_$project_name' >> /etc/hosts"
+        done
         puts "Done." GREEN
     fi
 }
@@ -357,6 +361,7 @@ restart() {
     cd .jefe/
     docker-compose -p $project_name restart
     cd ..
+    set_vhost
 }
 
 # Stop and remove containers, networks, images, and volumes.
