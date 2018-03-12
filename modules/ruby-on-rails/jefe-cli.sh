@@ -3,9 +3,6 @@
 # php-nginx-mysql jefe-cli.sh
 #
 
-# Load utilities
-source ~/.jefe-cli/libs/utilities.sh
-
 # Docker compose var env configuration.
 docker_env() {
     puts "Docker compose var env configuration." BLUE

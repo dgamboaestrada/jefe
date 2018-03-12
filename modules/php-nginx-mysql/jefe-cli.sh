@@ -3,9 +3,6 @@
 # php-nginx-mysql jefe-cli.sh
 #
 
-# Load utilities
-source ~/.jefe-cli/libs/utilities.sh
-
 if [[ -f  ".jefe/.env" ]]; then
     load_dotenv
 fi

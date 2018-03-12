@@ -2,11 +2,11 @@
 # jefe-cli
 # version 1.1.0
 
-# Define constants
-ROOT_DIRECTORY=~/.jefe-cli
+# Get root dir of the jefe-cli bash script
+DIR="$(dirname "$(readlink -f "$0")")"
 
 # Load utilities
-source $ROOT_DIRECTORY/libs/utilities.sh
+source $DIR/libs/utilities.sh
 
 # Print jefe version.
 --version(){
@@ -56,7 +56,7 @@ Database commands:
 Deploy commands
     deploy			Synchronize files to the selected environment
 EOF
-    usage_module=$ROOT_DIRECTORY/modules/${project_type}/usage.txt
+    usage_module=$DIR/modules/${project_type}/usage.txt
     if [[ -f  "$usage_module" ]]; then
         cat $usage_module
     fi
@@ -71,7 +71,7 @@ EOF
 init() {
     # Print logo.
     tput setaf 2;
-    cat ~/.jefe-cli/logo.txt
+    cat $DIR/logo.txt
 
     # Select type of project.
     flag=true
@@ -108,9 +108,9 @@ init() {
         esac
     done
     mkdir .jefe
-    source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
-    cp ~/.jefe-cli/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
-    cp ~/.jefe-cli/templates/environments.yaml .jefe/environments.yaml # Copy template jefe-cli.sh for custome tasks.
+    source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    cp $DIR/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
+    cp $DIR/templates/environments.yaml .jefe/environments.yaml # Copy template jefe-cli.sh for custome tasks.
     docker_env
     load_dotenv
     sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
@@ -433,7 +433,7 @@ config_environments() {
     load_dotenv
     puts "Config environments.." BLUE
     if [[ ! -f ".jefe/.environments.yaml" ]]; then
-        cp "~/.jefe-cli/modules/${project_type}/default.environments.yaml" .jefe/environments.yaml
+        cp "$DIR/modules/${project_type}/default.environments.yaml" .jefe/environments.yaml
     fi
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
@@ -529,8 +529,8 @@ logs() {
 
 # Upgrade jefe cli
 update() {
-    git -C ~/.jefe-cli fetch origin
-    git -C ~/.jefe-cli pull origin master
+    git -C $DIR fetch origin
+    git -C $DIR pull origin master
     puts "Updated successfully." GREEN
 }
 
@@ -538,7 +538,7 @@ update() {
 update_module() {
     # Docker compose var env configuration.
     load_dotenv
-    cp ~/.jefe-cli/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
+    cp $DIR/modules/${project_type}/docker-compose.yml .jefe/docker-compose.yml # Copy docker-compose configuration.
     sed -i "s/<PROJECT_NAME>/${project_name}/g" .jefe/docker-compose.yml
     puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
@@ -546,7 +546,7 @@ update_module() {
 
 if [[ -f  ".jefe/.env" ]]; then
     load_dotenv
-    source ~/.jefe-cli/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
     if [[ -f  ".jefe/jefe-cli.sh" ]]; then
         source .jefe/jefe-cli.sh
     fi
