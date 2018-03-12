@@ -1,3 +1,14 @@
+# Version 1.3.2
+- module: Remove laravel module and it si added as framework into php-nginx-mysql module.
+- fix: Set correct name of rails image for ruby-on-rails module.
+- core: Remove default.environments.yaml of modules an create a template for all modules.
+- core: Add support for multivhost.
+- core: Delete script for remove alpha jefe version.
+- core: Use DIR constant for dir path of the jefe-cli bash script
+- core: Use PROJECT_DIR constant for dir path of the jefe proyect
+- fix: Validate if www-data user exist when assigning permissions
+- docs: Add documentations of the task stop_nginx_proxy and start_nginx_proxy
+- core: Remove build task
 # Version 1.3.1
 - module: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
 - module: Fix do not working commands ps, restart, logs

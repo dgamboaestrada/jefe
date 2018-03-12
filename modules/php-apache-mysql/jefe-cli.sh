@@ -3,16 +3,13 @@
 # php-apache-mysql jefe-cli.sh
 #
 
-# Load utilities
-source ~/.jefe-cli/libs/utilities.sh
-
 # Docker compose var env configuration.
 docker_env() {
     puts "Docker compose var env configuration." BLUE
-    #     if [[ ! -f ".jefe/.env" ]]; then
-    #         cp .jefe/default.env .jefe/.env
+    #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
+    #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
     #     fi
-    echo "" > .jefe/.env
+    echo "" > $PROYECT_DIR/.env
     set_dotenv PROJECT_TYPE $project_type
     puts "Write project name (default $project_type):" MAGENTA
     read proyect_name
@@ -71,13 +68,29 @@ docker_env() {
 
 # Add vhost of /etc/hosts file
 set_vhost(){
+    remove_vhost # Remove old vhost
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         load_dotenv
-        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
-        sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
+        hosts="$( echo "$VHOST" | tr ',' ' ' )"
+        for host in $hosts; do
+            sudo sh -c "echo '127.0.0.1     $host # ----- jefe-cli_$project_name' >> /etc/hosts"
+            sudo sh -c "echo '127.0.0.1     phpmyadmin.$host # ----- jefe-cli_$project_name' >> /etc/hosts"
+        done
         puts "Done." GREEN
     fi
+}
+
+# Fix permisions of the proyect folder
+permissions(){
+    load_dotenv
+    puts "Setting permissions..." BLUE
+    cd $PROYECT_DIR
+        if id "www-data" >/dev/null 2>&1; then
+            sudo chown -R "$USER:www-data" $project_root
+        fi
+    cd ..
+    puts "Done." GREEN
 }
 
 # Create dump of the database of the proyect.

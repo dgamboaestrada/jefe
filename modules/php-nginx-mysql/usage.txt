@@ -2,3 +2,5 @@
 Commands for php-nginx-mysql proyect:
     composer_install		Execute the command "composer install" in workdir folder
     composer_update		Execute the command "composer update" in workdir folder
+    migrate			Running migration of the framework
+    seed			Run all database seeds of the framework

@@ -1,7 +1,7 @@
 version: '2'
 services:
   <PROJECT_NAME>_rails:
-    image: 'jefecito/ruby:2.3.3-rails-dependencies'
+    image: 'jefecito/ruby:2.3.3-rails'
     container_name: '${PROJECT_NAME}_rails'
     networks:
       - jefe-cli

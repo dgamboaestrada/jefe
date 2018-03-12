@@ -1,6 +1,0 @@
-
-Commands for laravel proyect:
-    composer_install		Execute the command "composer install" in workdir folder
-    composer_update		Execute the command "composer update" in workdir folder
-    migrate			Execute the command "php artisan migrate" in workdir folder. Running laravel migrations
-    seed			Execute the command "php artisan db:seed" in workdir folder. Run all laravel database seeds

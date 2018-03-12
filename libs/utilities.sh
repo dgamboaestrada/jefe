@@ -66,6 +66,7 @@ load_dotenv(){
     dbuser=$( get_dotenv "DB_USER" )
     dbpassword=$( get_dotenv "DB_PASSWORD" )
     dbhost=$( get_dotenv "DB_HOST" )
+    FRAMEWORK=$( get_dotenv "FRAMEWORK" )
 }
 
 # read yaml file
