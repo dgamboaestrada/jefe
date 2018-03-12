@@ -44,13 +44,6 @@ puts() {
     unset output_color
 }
 
-# Remove alpha version of jefe
-if [ -f ~/.zshrc ]; then
-    puts "Removing alpha version of jefe..."
-    sudo rm /usr/local/bin/jefe
-    puts "Done." GREEN
-fi
-
 puts "Cloning repositorie..."
 git clone git@github.com:dgamboaestrada/jefe.git -b master ~/.jefe-cli/
 chmod +x ~/.jefe-cli/jefe-cli.sh
