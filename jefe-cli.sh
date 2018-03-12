@@ -21,7 +21,7 @@ source $DIR/libs/utilities.sh
 # Print usage.
 --help(){
     usage= cat <<EOF
-jefe [-h] [--help]
+jefe [-h] [--help] <command>
 
 Arguments:
     -h, --help			Print Help (this message) and exit
@@ -31,13 +31,16 @@ Commands:
     build			Build or rebuild services
     destroy			Remove containers of docker-compose and delete folder .jefe
     down			Stop and remove containers, networks, images, and volumes
-    permissions		Fix permisions of the proyect folder
     init			Create an empty jefe proyect and configure project
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
+    permissions		Fix permisions of the proyect folder
     ps				List containers
+    remove_nginx_proxy		Remove jefe_nginx_proxy container
     restart			Restart containers
+    start_nginx_proxy		Create or start nginx_proxy container
     stop			Stop containers
+    stop_nginx_proxy		Stop jefe_nginx_proxy container
     up				Create and start containers
     update			Upgrade jefe-cli
     update_module		Update module of the proyect
