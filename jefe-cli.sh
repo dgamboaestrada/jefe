@@ -28,7 +28,6 @@ Arguments:
     -v, --version		Print version information and exit
 
 Commands:
-    build			Build or rebuild services
     destroy			Remove containers of docker-compose and delete folder .jefe
     down			Stop and remove containers, networks, images, and volumes
     init			Create an empty jefe proyect and configure project
@@ -420,14 +419,6 @@ EOF
     puts "Done." GREEN
     cd ..
     remove_vhost
-}
-
-# Build or rebuild services.
-build() {
-    load_dotenv
-    cd $PROYECT_DIR/
-    docker-compose -p $project_name build --no-cache
-    cd ..
 }
 
 # Config environments.
