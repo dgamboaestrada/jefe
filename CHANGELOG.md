@@ -6,6 +6,7 @@
 - core: Delete script for remove alpha jefe version.
 - core: Use DIR constant for dir path of the jefe-cli bash script
 - core: Use PROJECT_DIR constant for dir path of the jefe proyect
+- fix: Validate if www-data user exist when assigning permissions
 # Version 1.3.1
 - module: Fix error do not up nginx to restart proyect for laravel and php-nginx-mysql module.
 - module: Fix do not working commands ps, restart, logs

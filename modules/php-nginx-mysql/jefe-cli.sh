@@ -123,6 +123,18 @@ set_vhost(){
     fi
 }
 
+# Fix permisions of the proyect folder
+permissions(){
+    load_dotenv
+    puts "Setting permissions..." BLUE
+    cd $PROYECT_DIR
+        if id "www-data" >/dev/null 2>&1; then
+            sudo chown -R "$USER:www-data" $project_root
+        fi
+    cd ..
+    puts "Done." GREEN
+}
+
 # Create dump of the database of the proyect.
 dump() {
     usage= cat <<EOF

@@ -232,7 +232,7 @@ create_folder_structure() {
 
 # Add vhost to /etc/hosts file.
 set_vhost(){
-    remove_vhost # Remove old vhost
+    remove_vhost # Remove old vhost.
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         load_dotenv
@@ -252,12 +252,10 @@ remove_vhost(){
     puts "Done." GREEN
 }
 
-# Fix permisions of the proyect folder
+# Fix permisions of the proyect folder. Template function.
 permissions(){
-    load_dotenv
     puts "Setting permissions..." BLUE
     cd $PROYECT_DIR
-    sudo chown -R "$USER:www-data" $project_root
     cd ..
     puts "Done." GREEN
 }
