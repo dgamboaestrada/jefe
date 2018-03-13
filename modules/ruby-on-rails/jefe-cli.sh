@@ -3,6 +3,14 @@
 # php-nginx-mysql jefe-cli.sh
 #
 
+# load container names vars
+load_containers_names(){
+    load_dotenv
+    VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
+    DATABASE_CONTAINER_NAME="${project_name}_postgresql"
+    APP_CONTAINER_NAME="${project_name}_rails"
+}
+
 # Docker compose var env configuration.
 docker_env() {
     puts "Docker compose var env configuration." BLUE
@@ -94,8 +102,9 @@ EOF
     done
 
     load_dotenv
+    load_containers_names
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -it ${project_name}_rails pg_dump -U ${dbname} > "./dumps/${FILE_NAME}"
+        docker exec -it $DATABASE_CONTAINER_NAME pg_dump -U ${dbuser} ${dbname} > "./dumps/${FILE_NAME}"
     fi
 }
 
@@ -129,9 +138,10 @@ EOF
         esac
     done
 
-    load_dotenv
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -it ${project_name}_rails psql ${dbname} < "./dumps/${FILE_NAME}"
+        load_dotenv
+        load_containers_names
+        docker exec -i $DATABASE_CONTAINER_NAME psql -U ${dbuser} ${dbname} < "./dumps/${FILE_NAME}"
     fi
 }
 
@@ -164,7 +174,8 @@ EOF
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         load_dotenv
-        docker exec -it ${project_name}_rails bash -c 'rails db:migrate VERSION=0;rails db:migrate'
+        load_containers_names
+        docker exec -it $APP_CONTAINER_NAME bash -c 'rails db:migrate VERSION=0;rails db:migrate'
     fi
 }
 
