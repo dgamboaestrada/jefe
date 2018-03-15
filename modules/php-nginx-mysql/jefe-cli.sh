@@ -6,6 +6,15 @@
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
     load_dotenv
 fi
+# load container names vars
+load_containers_names(){
+    load_dotenv
+    VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
+    DATABASE_CONTAINER_NAME="${project_name}_mysql"
+    APP_CONTAINER_NAME="${project_name}_php"
+    NGINX_CONTAINER_NAME="${project_name}_nginx"
+}
+
 # Docker compose var env configuration.
 docker_env() {
     puts "Docker compose var env configuration." BLUE
@@ -166,11 +175,9 @@ EOF
     done
 
     load_dotenv
+    load_containers_names
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i ${project_name}_db mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > "./dumps/${FILE_NAME}"
-    else
-        load_settings_env $ENVIRONMENT
-        ssh ${user}@${host} "mysqldump -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} > ./dumps/${FILE_NAME}"
+        docker exec -i $DATABASE_CONTAINER_NAME mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > "./dumps/${FILE_NAME}"
     fi
 }
 
@@ -205,11 +212,9 @@ EOF
     done
 
     load_dotenv
+    load_containers_names
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i ${project_name}_mysql mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
-    else
-        load_settings_env $ENVIRONMENT
-        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
+        docker exec -i $DATABASE_CONTAINER_NAME mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
     fi
 }
 
