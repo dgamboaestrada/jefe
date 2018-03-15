@@ -2,6 +2,8 @@
 - rails: Fix command import_dump
 - rails: Fix command dump
 - wordpress: Remove templates of wordpress module
+- service: Create estructure for services
+- service: Add adminer service
 # Version 1.3.2
 - module: Remove laravel module and it si added as framework into php-nginx-mysql module.
 - fix: Set correct name of rails image for ruby-on-rails module.
