@@ -7,8 +7,8 @@ DIR="$(dirname "$(readlink -f "$0")")"
 PROYECT_DIR="$PWD/.jefe"
 
 # Load libraries
-source $DIR/libs/utilities.sh
-source $DIR/libs/services.sh
+source $DIR/libs/loader.sh
+source $DIR/services/loader.sh
 
 # Print jefe version.
 --version(){
@@ -36,10 +36,13 @@ Commands:
     logs			View output from containers
     permissions		Fix permisions of the proyect folder
     ps				List containers
+    remove_adminer		Remove jefe_adminer container
     remove_nginx_proxy		Remove jefe_nginx_proxy container
     restart			Restart containers
+    start_adminer		Create or start adminer container
     start_nginx_proxy		Create or start nginx_proxy container
     stop			Stop containers
+    stop_adminer		Stop jefe_adminer container
     stop_nginx_proxy		Stop jefe_nginx_proxy container
     up				Create and start containers
     update			Upgrade jefe-cli
