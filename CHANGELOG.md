@@ -5,6 +5,7 @@
 - service: Create estructure for services
 - service: Add adminer service
 - module: Fix import dump and export dump commands for php-nginx-mysql module
+- module: Add rubocop command to rails module
 # Version 1.3.2
 - module: Remove laravel module and it si added as framework into php-nginx-mysql module.
 - fix: Set correct name of rails image for ruby-on-rails module.

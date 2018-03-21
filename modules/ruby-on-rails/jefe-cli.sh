@@ -187,7 +187,7 @@ bundle_install() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_dotenv
+    load_containers_names
     docker exec -it ${project_name}_rails bash -c 'bundle install'
   fi
 }
@@ -200,8 +200,8 @@ migrate() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_dotenv
-    docker exec -it ${project_name}_rails bash -c 'rails db:migrate'
+    load_containers_names
+    docker exec -it $APP_CONTAINER_NAME bash -c 'rails db:migrate'
   fi
 }
 
@@ -213,7 +213,20 @@ seed() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_dotenv
-    docker exec -it ${project_name}_rails bash -c 'rails db:seed'
+    load_containers_names
+    docker exec -it $APP_CONTAINER_NAME bash -c 'rails db:seed'
+  fi
+}
+
+# Execute the command "rubocop -R" in workdir folder.
+rubocop() {
+  e=$1
+  if [ -z "${e}" ]; then
+    e="docker"
+  fi
+
+  if [[ "$e" == "docker" ]]; then
+    load_containers_names
+    docker exec -it $APP_CONTAINER_NAME bash -c 'rubocop -R'
   fi
 }
