@@ -285,19 +285,22 @@ up() {
 up [-h] [--help]
 
 Arguments:
+    --logs			View output from containers
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
     DOCKER_COMPOSE_FILE="docker-compose.yml"
+    LOGS=false
 
     # read the options
-    OPTS=`getopt -o dp --long detached-mode,production -n 'jefe' -- "$@"`
+    OPTS=`getopt -o h --long logs,help -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
     eval set -- "$OPTS"
 
     # extract options and their arguments into variables.
     while true ; do
         case "$1" in
+            --logs) LOGS=true ; shift ;;
             -h|--help) echo $usage ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
@@ -306,11 +309,14 @@ EOF
 
     start_nginx_proxy
     load_dotenv
+    set_vhost
+    permissions
     cd $PROYECT_DIR/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
     cd ..
-    set_vhost
-    permissions
+    if [ "$LOGS" = true ] ; then
+        logs
+    fi
 }
 
 # Stop containers.
