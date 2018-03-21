@@ -1,6 +1,6 @@
 #!/bin/bash
 # jefe-cli
-# version 1.3.2
+# version 1.3.3
 
 # Get root dir of the jefe-cli bash script
 DIR="$(dirname "$(readlink -f "$0")")"
@@ -12,7 +12,7 @@ source $DIR/services/loader.sh
 
 # Print jefe version.
 --version(){
-    puts "1.3.2" BLUE
+    puts "1.3.3" BLUE
 }
 # Alias of --version.
 -v(){
