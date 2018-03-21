@@ -5,6 +5,15 @@
 # Load utilities
 source ~/.jefe-cli/libs/utilities.sh
 
+# load container names vars
+load_containers_names(){
+    load_dotenv
+    volume_database_container_name="${project_name}_db_data"
+    database_container_name="${project_name}_db"
+    wordpress_container_name="${project_name}_wordpress"
+    phpmyadmin_container_name="${project_name}_phpmyadmin"
+}
+
 # Configure environments vars of docker.
 docker_env() {
     puts "Docker compose var env configuration." BLUE
@@ -75,15 +84,6 @@ set_vhost(){
         sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
         puts "Done." GREEN
     fi
-}
-
-# load container names vars
-load_containers_names(){
-    load_dotenv
-    volume_database_container_name="${project_name}_db_data"
-    database_container_name="${project_name}_db"
-    wordpress_container_name="${project_name}_wordpress"
-    phpmyadmin_container_name="${project_name}_phpmyadmin"
 }
 
 # Create dump of the database of the proyect.

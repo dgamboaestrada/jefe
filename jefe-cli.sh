@@ -1,17 +1,18 @@
 #!/bin/bash
 # jefe-cli
-# version 1.3.2
+# version 1.3.3
 
 # Get root dir of the jefe-cli bash script
 DIR="$(dirname "$(readlink -f "$0")")"
 PROYECT_DIR="$PWD/.jefe"
 
-# Load utilities
-source $DIR/libs/utilities.sh
+# Load libraries
+source $DIR/libs/loader.sh
+source $DIR/services/loader.sh
 
 # Print jefe version.
 --version(){
-    puts "1.3.2" BLUE
+    puts "1.3.3" BLUE
 }
 # Alias of --version.
 -v(){
@@ -35,10 +36,13 @@ Commands:
     logs			View output from containers
     permissions		Fix permisions of the proyect folder
     ps				List containers
+    remove_adminer		Remove jefe_adminer container
     remove_nginx_proxy		Remove jefe_nginx_proxy container
     restart			Restart containers
+    start_adminer		Create or start adminer container
     start_nginx_proxy		Create or start nginx_proxy container
     stop			Stop containers
+    stop_adminer		Stop jefe_adminer container
     stop_nginx_proxy		Stop jefe_nginx_proxy container
     up				Create and start containers
     update			Upgrade jefe-cli
@@ -262,43 +266,6 @@ permissions(){
     puts "Done." GREEN
 }
 
-# Create or start nginx_proxy container.
-start_nginx_proxy(){
-    if [ ! "$(docker network ls | grep jefe-cli)" ]; then
-        puts "Creating jefe-cli network..." BLUE
-        docker network create "jefe-cli"
-        puts "Done." GREEN
-    fi
-    # If jefe_nginx_proxy containr not exist then create
-    if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_nginx_proxy") ]; then
-        puts "Running jefe_nginx_proxy container..." BLUE
-        docker run -d --name jefe_nginx_proxy -p 80:80 --network jefe-cli -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy:latest
-        puts "Done." GREEN
-    else
-        puts "Starting jefe_nginx_proxy container..." BLUE
-        docker start jefe_nginx_proxy
-        puts "Done." GREEN
-    fi
-}
-
-# Stop jefe_nginx_proxy container.
-stop_nginx_proxy(){
-    puts "Stoping jefe_nginx_proxy container..." BLUE
-    docker stop jefe_nginx_proxy
-    puts "Done." GREEN
-}
-
-# Remove jefe_nginx_proxy container.
-remove_nginx_proxy(){
-    # If jefe_nginx_proxy containr is running then stop
-    if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_nginx_proxy") ]; then
-        stop_nginx_proxy
-    fi
-    puts "Removing jefe_nginx_proxy container..." BLUE
-    docker rm jefe_nginx_proxy
-    puts "Done." GREEN
-}
-
 # Remove containers of docker-compose and delete folder .jefe.
 destroy() {
     puts "The containers and its volumes are destroyed also the folder .jefe will be destroyed." RED
@@ -318,19 +285,22 @@ up() {
 up [-h] [--help]
 
 Arguments:
+    --logs			View output from containers
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
     DOCKER_COMPOSE_FILE="docker-compose.yml"
+    LOGS=false
 
     # read the options
-    OPTS=`getopt -o dp --long detached-mode,production -n 'jefe' -- "$@"`
+    OPTS=`getopt -o h --long logs,help -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
     eval set -- "$OPTS"
 
     # extract options and their arguments into variables.
     while true ; do
         case "$1" in
+            --logs) LOGS=true ; shift ;;
             -h|--help) echo $usage ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
@@ -339,11 +309,14 @@ EOF
 
     start_nginx_proxy
     load_dotenv
+    set_vhost
+    permissions
     cd $PROYECT_DIR/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
     cd ..
-    set_vhost
-    permissions
+    if [ "$LOGS" = true ] ; then
+        logs
+    fi
 }
 
 # Stop containers.
