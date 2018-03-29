@@ -480,9 +480,7 @@ EOF
             *) echo "Internal error!" ; exit 1 ;;
         esac
     done
-    cd $PROYECT_DIR/
     docker exec -it $1 bash
-    cd ..
 }
 
 # View output from containers.
