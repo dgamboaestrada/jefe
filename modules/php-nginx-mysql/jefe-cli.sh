@@ -114,34 +114,6 @@ docker_env() {
     set_dotenv DOCUMENT_ROOT $document_root
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
-    puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
-}
-
-# Add vhost of /etc/hosts file
-set_vhost(){
-    remove_vhost # Remove old vhost
-    if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
-        puts "Setting vhost..." BLUE
-        load_dotenv
-        hosts="$( echo "$VHOST" | tr ',' ' ' )"
-        for host in $hosts; do
-            sudo sh -c "echo '127.0.0.1     $host # ----- jefe-cli_$project_name' >> /etc/hosts"
-            sudo sh -c "echo '127.0.0.1     phpmyadmin.$host # ----- jefe-cli_$project_name' >> /etc/hosts"
-        done
-        puts "Done." GREEN
-    fi
-}
-
-# Fix permisions of the proyect folder
-permissions(){
-    load_dotenv
-    puts "Setting permissions..." BLUE
-    cd $PROYECT_DIR
-        if id "www-data" >/dev/null 2>&1; then
-            sudo chown -R "$USER:www-data" $project_root
-        fi
-    cd ..
-    puts "Done." GREEN
 }
 
 # Create dump of the database of the proyect.

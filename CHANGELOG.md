@@ -1,5 +1,6 @@
 # Version 1.3.4
 - module-rails: Add itbash command with menu iterative to rails module
+- module-pnm: Remove phpmyadmin container from php-nginx-mysql module
 # Version 1.3.3
 - module-rails: Fix command import_dump
 - module-rails: Fix command dump
