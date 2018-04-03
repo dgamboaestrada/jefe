@@ -10,6 +10,11 @@ PROYECT_DIR="$PWD/.jefe"
 source $DIR/libs/loader.sh
 source $DIR/services/loader.sh
 
+# Load dotenv vars
+if [[ -f  "$PROYECT_DIR/.env" ]]; then
+    load_dotenv
+fi
+
 # Print jefe version.
 --version(){
     puts "1.3.3" BLUE
@@ -199,7 +204,6 @@ EOF
         esac
     done
 
-    load_dotenv
     load_settings_env $ENVIRONMENT
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
     cd $PROYECT_DIR
@@ -241,7 +245,6 @@ set_vhost(){
     remove_vhost # Remove old vhost.
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
-        load_dotenv
         hosts="$( echo "$VHOST" | tr ',' ' ' )"
         for host in $hosts; do
             sudo sh -c "echo '127.0.0.1     $host # ----- jefe-cli_$project_name' >> /etc/hosts"
@@ -253,7 +256,6 @@ set_vhost(){
 # Remove vhost to /etc/hosts file.
 remove_vhost(){
     puts "Removing vhost..." BLUE
-    load_dotenv
     sudo sh -c "sed -i '/# ----- jefe-cli_$project_name/d' /etc/hosts"
     puts "Done." GREEN
 }
@@ -307,22 +309,33 @@ EOF
         esac
     done
 
+    before_up
     start_nginx_proxy
-    load_dotenv
     set_vhost
     permissions
     cd $PROYECT_DIR/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
     cd ..
+    after_up
+
     if [ "$LOGS" = true ] ; then
         logs
     fi
 }
 
+after_up() {
+    echo ""
+    # Code to execute after up
+}
+
+before_up() {
+    echo ""
+    # Code to execute before up
+}
+
 # Stop containers.
 stop() {
     remove_vhost
-    load_dotenv
     cd $PROYECT_DIR/
     docker-compose -p $project_name stop
     cd ..
@@ -331,7 +344,6 @@ stop() {
 
 # Restart containers
 restart() {
-    load_dotenv
     cd $PROYECT_DIR/
     docker-compose -p $project_name restart
     cd ..
@@ -385,7 +397,6 @@ EOF
         fi
     fi
 
-    load_dotenv
     cd $PROYECT_DIR/
     puts "Down containers." BLUE
     docker-compose -p $project_name down $v
@@ -396,7 +407,6 @@ EOF
 
 # Config environments.
 config_environments() {
-    load_dotenv
     puts "Config environments.." BLUE
     if [[ ! -f "$PROYECT_DIR/.environments.yaml" ]]; then
         cp "$DIR/modules/${project_type}/default.environments.yaml" $PROYECT_DIR/environments.yaml
@@ -453,7 +463,6 @@ docker_env() {
 }
 # List containers.
 ps() {
-    load_dotenv
     cd $PROYECT_DIR
     docker-compose -p $project_name ps
     cd ..
@@ -485,7 +494,6 @@ EOF
 
 # View output from containers.
 logs() {
-    load_dotenv
     cd $PROYECT_DIR
     docker-compose -p $project_name logs -f
     cd ..
@@ -501,7 +509,6 @@ update() {
 # Update module of the proyect
 update_module() {
     # Docker compose var env configuration.
-    load_dotenv
     cp $DIR/modules/${project_type}/docker-compose.yml $PROYECT_DIR/docker-compose.yml # Copy docker-compose configuration.
     sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
     puts "Reboot the containers to see the changes (jefe restart)." YELLOW
@@ -509,7 +516,6 @@ update_module() {
 }
 
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
-    load_dotenv
     source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
     if [[ -f  "$PROYECT_DIR/jefe-cli.sh" ]]; then
         source $PROYECT_DIR/jefe-cli.sh
