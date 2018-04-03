@@ -348,6 +348,7 @@ restart() {
     docker-compose -p $project_name restart
     cd ..
     set_vhost
+    after_up
 }
 
 # Stop and remove containers, networks, images, and volumes.

@@ -3,9 +3,11 @@
 # php-nginx-mysql jefe-cli.sh
 #
 
+# Load dotenv vars
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
     load_dotenv
 fi
+
 # load container names vars
 load_containers_names(){
     load_dotenv
@@ -79,6 +81,7 @@ docker_env() {
         puts "1) None"
         puts "2) Laravel"
         puts "3) CakePHP"
+        puts "4) Symfony"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:"
         read option
 
@@ -104,6 +107,11 @@ docker_env() {
                 document_root='/var/www/html/webroot'
                 flag=false
                 ;;
+            4)
+                framework=Symfony
+                document_root='/var/www/html/web'
+                flag=false
+                ;;
             *)
                 puts "Wrong option" RED
                 flag=true
@@ -114,6 +122,15 @@ docker_env() {
     set_dotenv DOCUMENT_ROOT $document_root
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
+}
+
+# Fix permisions of the proyect folder
+after_up(){
+    puts "Setting permissions..." BLUE
+    if id "www-data" >/dev/null 2>&1; then
+        docker exec -it ${project_name}_php bash -c 'chgrp www-data -R .'
+    fi
+    puts "Done." GREEN
 }
 
 # Create dump of the database of the proyect.
@@ -299,5 +316,26 @@ EOF
     seed() {
         load_dotenv
         docker exec -it ${project_name}_php bash -c 'php artisan db:seed'
+    }
+fi
+
+if [[ $FRAMEWORK == "Symfony" ]]; then
+    # Fix permisions of the proyect folder
+    after_up(){
+        puts "Setting permissions..." BLUE
+        docker exec -it ${project_name}_php bash -c 'php symfony cc'
+        docker exec -it ${project_name}_php bash -c 'php symfony permissions'
+        if id "www-data" >/dev/null 2>&1; then
+            docker exec -it ${project_name}_php bash -c 'chgrp www-data -R .'
+        fi
+        puts "Done." GREEN
+    }
+    migrate() {
+        echo 'Command not implemented yet'
+        exit 1
+    }
+    seed() {
+        echo 'Command not implemented yet'
+        exit 1
     }
 fi
