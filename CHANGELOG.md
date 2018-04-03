@@ -3,6 +3,7 @@
 - module-pnm: Remove phpmyadmin container from php-nginx-mysql module
 - core: Add after and before triggers for up command
 - module-pnm: Add Symfony framework suport for php-nginx-mysql module
+- core: Remove update_module command
 # Version 1.3.3
 - module-rails: Fix command import_dump
 - module-rails: Fix command dump

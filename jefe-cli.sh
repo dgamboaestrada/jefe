@@ -51,7 +51,6 @@ Commands:
     stop_nginx_proxy		Stop jefe_nginx_proxy container
     up				Create and start containers
     update			Upgrade jefe-cli
-    update_module		Update module of the proyect
 
 Settings commands:
     config_environments		Config environments
@@ -504,15 +503,6 @@ logs() {
 update() {
     git -C $DIR fetch origin
     git -C $DIR pull origin master
-    puts "Updated successfully." GREEN
-}
-
-# Update module of the proyect
-update_module() {
-    # Docker compose var env configuration.
-    cp $DIR/modules/${project_type}/docker-compose.yml $PROYECT_DIR/docker-compose.yml # Copy docker-compose configuration.
-    sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
-    puts "Reboot the containers to see the changes (jefe restart)." YELLOW
     puts "Updated successfully." GREEN
 }
 
