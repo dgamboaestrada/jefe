@@ -4,6 +4,7 @@
 - core: Add after and before triggers for up command
 - module-pnm: Add Symfony framework suport for php-nginx-mysql module
 - core: Remove update_module command
+- core: Fix error to execute update command in branch not equals to master
 # Version 1.3.3
 - module-rails: Fix command import_dump
 - module-rails: Fix command dump

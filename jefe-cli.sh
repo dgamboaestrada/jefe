@@ -501,9 +501,8 @@ logs() {
 
 # Upgrade jefe cli
 update() {
-    git -C $DIR fetch origin
-    git -C $DIR pull origin master
-    puts "Updated successfully." GREEN
+    branch_name=$(current_branch)
+    git -C $DIR pull origin $branch_name
 }
 
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
