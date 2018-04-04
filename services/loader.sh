@@ -3,5 +3,9 @@
 # services.sh
 #
 
-source $DIR/services/nginx-proxy.sh
-source $DIR/services/adminer.sh
+services=$( ls "$DIR/services/" )
+for service in $services; do
+    if [[ "$service" != "loader.sh" ]]; then
+        source "$DIR/services/$service"
+    fi
+done

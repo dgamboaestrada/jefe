@@ -1,3 +1,5 @@
+# Version 1.3.5
+- core: Refactorice loaders script to import other scripts in services and libraries
 # Version 1.3.4
 - module-rails: Add itbash command with menu iterative to rails module
 - module-pnm: Remove phpmyadmin container from php-nginx-mysql module
