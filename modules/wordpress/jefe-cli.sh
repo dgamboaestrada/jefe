@@ -7,11 +7,9 @@ source ~/.jefe-cli/libs/utilities.sh
 
 # load container names vars
 load_containers_names(){
-    load_dotenv
-    volume_database_container_name="${project_name}_db_data"
-    database_container_name="${project_name}_db"
-    wordpress_container_name="${project_name}_wordpress"
-    phpmyadmin_container_name="${project_name}_phpmyadmin"
+    VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
+    DATABASE_CONTAINER_NAME="${project_name}_db"
+    APP_CONTAINER_NAME="${project_name}_wordpress"
 }
 
 # Configure environments vars of docker.
@@ -63,7 +61,6 @@ docker_env() {
         set_dotenv WORDPRESS_TABLE_PREFIX $option
     fi
 
-    load_dotenv
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
     puts "Database name is wordpress" YELLOW
@@ -79,7 +76,6 @@ docker_env() {
 set_vhost(){
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
-        load_dotenv
         sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
         sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
         puts "Done." GREEN
@@ -116,7 +112,6 @@ EOF
         esac
     done
 
-    load_dotenv
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         docker exec -i ${project_name}_db mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > "./dumps/${FILE_NAME}"
     else
@@ -128,10 +123,9 @@ EOF
 # Import dump of dumps folder of the proyect.
 import_dump() {
     usage= cat <<EOF
-import_dump [-e] [--environment] [-f] [--file] [-h] [--help]
+import_dump [-f] [--file] [-h] [--help]
 
 Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
     -f, --file			File name of dump to import. Defualt is dump.sql
     -h, --help			Print Help (this message) and exit
 EOF
@@ -155,13 +149,9 @@ EOF
         esac
     done
 
-    load_dotenv
-    if [[ "$ENVIRONMENT" == "docker" ]]; then
-        docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
-    else
-        load_settings_env $ENVIRONMENT
-        ssh ${user}@${host} "mysql -u${dbuser} -p\"${dbpassword}\" ${dbname} --host=${dbhost} < ./dumps/${FILE_NAME}"
-    fi
+    docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
+    set_siteurl
+
 }
 
 # Delete database and create empty database.
@@ -192,7 +182,6 @@ EOF
     done
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        load_dotenv
         docker exec -i ${project_name}_db mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
     else
         load_settings_env $ENVIRONMENT
@@ -200,7 +189,7 @@ EOF
     fi
 }
 
-# Update siteurl option value in wordpress database.
+# Update siteurl and home options value in wordpress database.
 set_siteurl() {
     usage= cat <<EOF
 set_siteurl [-e] [--environment] [-H] [--host] [-h] [--help]
@@ -211,7 +200,6 @@ Arguments:
     -h, --help			Print Help (this message) and exit
 EOF
     # set an initial value for the flag
-    load_dotenv
     ENVIRONMENT="docker"
     HOST="$VHOST"
 
@@ -271,7 +259,6 @@ EOF
         esac
     done
 
-    load_dotenv
     load_settings_env $ENVIRONMENT
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
     cd .jefe
@@ -294,7 +281,6 @@ composer_install() {
         e="docker"
     fi
     if [[ "$e" == "docker" ]]; then
-        load_dotenv
         docker exec -it ${project_name}_php bash -c 'composer install'
     else
         load_settings_env $e
@@ -309,10 +295,12 @@ composer_update() {
         e="docker"
     fi
     if [[ "$e" == "docker" ]]; then
-        load_dotenv
         docker exec -it ${project_name}_php bash -c 'composer update'
     else
         load_settings_env $e
         ssh ${user}@${host} -p $port "cd ${public_dir}/; composer update"
     fi
 }
+
+# Initialice
+load_containers_names

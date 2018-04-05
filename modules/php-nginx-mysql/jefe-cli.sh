@@ -3,14 +3,8 @@
 # php-nginx-mysql jefe-cli.sh
 #
 
-# Load dotenv vars
-if [[ -f  "$PROYECT_DIR/.env" ]]; then
-    load_dotenv
-fi
-
 # load container names vars
 load_containers_names(){
-    load_dotenv
     VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
     DATABASE_CONTAINER_NAME="${project_name}_mysql"
     APP_CONTAINER_NAME="${project_name}_php"
@@ -163,8 +157,6 @@ EOF
         esac
     done
 
-    load_dotenv
-    load_containers_names
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         docker exec -i $DATABASE_CONTAINER_NAME mysqldump -u ${dbuser} -p"${dbpassword}" ${dbname}  > "./dumps/${FILE_NAME}"
     fi
@@ -200,8 +192,6 @@ EOF
         esac
     done
 
-    load_dotenv
-    load_containers_names
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         docker exec -i $DATABASE_CONTAINER_NAME mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
     fi
@@ -235,7 +225,6 @@ EOF
     done
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        load_dotenv
         docker exec -i ${project_name}_mysql mysql -u"${dbuser}" -p"${dbpassword}" -e "DROP DATABASE IF EXISTS ${dbname}; CREATE DATABASE ${dbname}"
     else
         load_settings_env $ENVIRONMENT
@@ -250,7 +239,6 @@ composer_install() {
         e="docker"
     fi
     if [[ "$e" == "docker" ]]; then
-        load_dotenv
         docker exec -it ${project_name}_php bash -c 'composer install'
     else
         load_settings_env $e
@@ -265,7 +253,6 @@ composer_update() {
         e="docker"
     fi
     if [[ "$e" == "docker" ]]; then
-        load_dotenv
         docker exec -it ${project_name}_php bash -c 'composer update'
     else
         load_settings_env $e
@@ -296,7 +283,6 @@ EOF
         eval set -- "$OPTS"
 
         # extract options and their arguments into variables.
-        load_dotenv
         while true ; do
             case "$1" in
                 -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
@@ -314,7 +300,6 @@ EOF
 
     # Execute the command "php artisan db:seed" in workdir folder. Run all laravel database seeds
     seed() {
-        load_dotenv
         docker exec -it ${project_name}_php bash -c 'php artisan db:seed'
     }
 fi
@@ -339,3 +324,6 @@ if [[ $FRAMEWORK == "Symfony" ]]; then
         exit 1
     }
 fi
+
+# Initialice
+load_containers_names

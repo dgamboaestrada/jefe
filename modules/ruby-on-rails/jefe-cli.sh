@@ -5,7 +5,6 @@
 
 # load container names vars
 load_containers_names(){
-    load_dotenv
     VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
     DATABASE_CONTAINER_NAME="${project_name}_postgresql"
     APP_CONTAINER_NAME="${project_name}_rails"
@@ -71,60 +70,6 @@ docker_env() {
     fi
 }
 
-# Enter in bash mode iterative for the selected container.
-itbash() {
-    usage= cat <<EOF
-itbash [-c] [--container] [-h] [--help] <container_name>
-
-Arguments:
-    -c, --container		Set container name to execute bash iterative
-    -h, --help			Print Help (this message) and exit
-EOF
-    # read the options
-    OPTS=`getopt -o c:h --long container:,help -n 'jefe' -- "$@"`
-    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
-    eval set -- "$OPTS"
-
-    # extract options and their arguments into variables.
-    while true ; do
-        case "$1" in
-            -c|--container) container_name=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
-            --) shift ; break ;;
-            *) echo "Internal error!" ; exit 1 ;;
-        esac
-    done
-
-    if [ -z "${container_name}" ]; then
-        # Select contaner.
-        # Display menu to select contaner name and return the seleted contanier.
-        flag=true
-        while [ $flag = true ]; do
-            puts "Select container" BLUE
-            puts "1) $APP_CONTAINER_NAME"
-            puts "2) $DATABASE_CONTAINER_NAME"
-            puts "Type the option (number) that you want(digit), followed by [ENTER]:" MAGENTA
-            read option
-
-            case $option in
-                1)
-                    container_name=$APP_CONTAINER_NAME
-                    flag=false
-                    ;;
-                2)
-                    container_name=$DATABASE_CONTAINER_NAME
-                    flag=false
-                    ;;
-                *)
-                    puts "Wrong option" RED
-                    flag=true
-                    ;;
-            esac
-        done
-    fi
-    docker exec -it $container_name bash
-}
-
 # Create dump of the database of the proyect.
 dump() {
     usage= cat <<EOF
@@ -155,8 +100,6 @@ EOF
         esac
     done
 
-    load_dotenv
-    load_containers_names
     if [[ "$ENVIRONMENT" == "docker" ]]; then
         docker exec -it $DATABASE_CONTAINER_NAME pg_dump -U ${dbuser} ${dbname} > "./dumps/${FILE_NAME}"
     fi
@@ -193,8 +136,6 @@ EOF
     done
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        load_dotenv
-        load_containers_names
         docker exec -i $DATABASE_CONTAINER_NAME psql -U ${dbuser} ${dbname} < "./dumps/${FILE_NAME}"
     fi
 }
@@ -227,8 +168,6 @@ EOF
     done
 
     if [[ "$ENVIRONMENT" == "docker" ]]; then
-        load_dotenv
-        load_containers_names
         docker exec -it $APP_CONTAINER_NAME bash -c 'rails db:migrate VERSION=0;rails db:migrate'
     fi
 }
@@ -241,7 +180,6 @@ bundle_install() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_containers_names
     docker exec -it ${project_name}_rails bash -c 'bundle install'
   fi
 }
@@ -254,7 +192,6 @@ migrate() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_containers_names
     docker exec -it $APP_CONTAINER_NAME bash -c 'rails db:migrate'
   fi
 }
@@ -267,7 +204,6 @@ seed() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_containers_names
     docker exec -it $APP_CONTAINER_NAME bash -c 'rails db:seed'
   fi
 }
@@ -280,7 +216,6 @@ rubocop() {
   fi
 
   if [[ "$e" == "docker" ]]; then
-    load_containers_names
     docker exec -it $APP_CONTAINER_NAME bash -c 'rubocop -R'
   fi
 }
