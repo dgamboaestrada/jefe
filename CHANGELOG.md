@@ -1,6 +1,7 @@
 # Version 1.3.5
 - core: Refactorice loaders script to import other scripts in services and libraries
 - core: Refactorice itbash command
+- module-wordpress: Refactorice deploy command and add after_up tringer for wordpress module
 # Version 1.3.4
 - module-rails: Add itbash command with menu iterative to rails module
 - module-pnm: Remove phpmyadmin container from php-nginx-mysql module

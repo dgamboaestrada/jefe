@@ -72,15 +72,15 @@ docker_env() {
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
 }
 
-# Add vhost of /etc/hosts file
-set_vhost(){
-    if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
-        puts "Setting vhost..." BLUE
-        sudo sh -c "echo '127.0.0.1     $VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
-        sudo sh -c "echo '127.0.0.1     phpmyadmin.$VHOST # ----- jefe-cli_$project_name' >> /etc/hosts"
-        puts "Done." GREEN
+# Fix permisions of the proyect folder
+after_up(){
+    puts "Setting permissions..." BLUE
+    if id "www-data" >/dev/null 2>&1; then
+        docker exec -it "$APP_CONTAINER_NAME" bash -c 'chgrp www-data -R .'
     fi
+    puts "Done." GREEN
 }
+
 
 # Create dump of the database of the proyect.
 dump() {
@@ -262,14 +262,24 @@ EOF
     load_settings_env $ENVIRONMENT
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
     cd .jefe
-    if ! $TEST; then
-        set -x #verbose on
-        rsync -az --force --delete --progress --exclude="uploads/" --exclude="upgrade/" --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
-        set +x #verbose off
-    else
+    if $TEST; then
         set -v #verbose on
-        rsync --dry-run -az --force --delete --progress --exclude="uploads/" --exclude="upgrade/" --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
+        puts "Synchronizing themes" BLUE
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/themes/." "${user}@${host}:$public_dir"
+        puts "Done." GREEN
+        puts "Synchronizing plugins" BLUE
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/plugins/." "${user}@${host}:$public_dir"
+        puts "Done." GREEN
         set +v #verbose off
+    else
+        set -x #verbose on
+        puts "Synchronizing themes" BLUE
+        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/themes/." "${user}@${host}:$public_dir"
+        puts "Done." GREEN
+        puts "Synchronizing plugins" BLUE
+        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/plugins/." "${user}@${host}:$public_dir"
+        puts "Done." GREEN
+        set +x #verbose off
     fi
     cd ..
 }
