@@ -265,25 +265,25 @@ EOF
     if $TEST; then
         puts "Synchronizing themes" BLUE
         set -v #verbose on
-        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/themes/." "${user}@${host}:${public_dir}themes"
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/themes/." "${user}@${host}:${public_dir}themes/"
         set +v #verbose off
         puts "Done." GREEN
 
         puts "Synchronizing plugins" BLUE
         set -x #verbose on
-        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/plugins/." "${user}@${host}:${public_dir}plugins"
+        rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/plugins/." "${user}@${host}:${public_dir}plugins/"
         set +v #verbose off
         puts "Done." GREEN
     else
         puts "Synchronizing themes" BLUE
         set -x #verbose on
-        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/themes/." "${user}@${host}:${public_dir}themes"
+        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/themes/." "${user}@${host}:${public_dir}themes/"
         set +x #verbose off
         puts "Done." GREEN
 
         puts "Synchronizing plugins" BLUE
         set -x #verbose on
-        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/plugins/." "${user}@${host}:${public_dir}plugins"
+        rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/plugins/." "${user}@${host}:${public_dir}plugins/"
         set +x #verbose off
         puts "Done." GREEN
     fi
