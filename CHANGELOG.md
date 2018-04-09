@@ -1,3 +1,5 @@
+# Version 1.3.6
+- module-wordpress: Fix deploy of wordpress module
 # Version 1.3.5
 - core: Refactorice loaders script to import other scripts in services and libraries
 - core: Refactorice itbash command
