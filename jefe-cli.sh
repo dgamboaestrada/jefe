@@ -1,7 +1,7 @@
 #!/bin/bash
 # jefe-cli
-# version 1.3.5
-VERSION="1.3.5"
+# version 1.3.6
+VERSION="1.3.6"
 
 # Get root dir of the jefe-cli bash script
 DIR="$(dirname "$(readlink -f "$0")")"
