@@ -1,10 +1,10 @@
 #!/bin/bash
 # jefe-cli
-# version 1.3.6
-VERSION="1.3.6"
+# version 1.3.7
+VERSION="1.3.7"
 
 # Get root dir of the jefe-cli bash script
-DIR="$(dirname "$(readlink -f "$0")")"
+DIR=~/.jefe-cli
 PROYECT_DIR="$PWD/.jefe"
 
 # Load libraries

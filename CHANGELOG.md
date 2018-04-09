@@ -1,3 +1,5 @@
+# Version 1.3.7
+- core: Set default value of DIR constant with ~/.jefe-cli
 # Version 1.3.6
 - module-wordpress: Fix deploy of wordpress module
 # Version 1.3.5
