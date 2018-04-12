@@ -30,16 +30,6 @@ services:
       WORDPRESS_DB_PASSWORD: wordpress
       WORDPRESS_TABLE_PREFIX: '${WORDPRESS_TABLE_PREFIX}'
       ENVIRONMENT: '${ENVIRONMENT}'
-  <PROJECT_NAME>_phpmyadmin:
-    depends_on:
-      - <PROJECT_NAME>_db
-    image: phpmyadmin/phpmyadmin
-    container_name: '${PROJECT_NAME}_phpmyadmin'
-    networks:
-      - jefe-cli
-    environment:
-      PMA_HOST: <PROJECT_NAME>_db
-      VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
 volumes:
   db_data: null
 networks:

@@ -1,5 +1,6 @@
 # Version 1.3.8
 - module-wordpress: Add compatibility with circle for deploy command of wordpress module
+- module-wordpress: Remove phpmyadmin from wordpress module
 # Version 1.3.7
 - core: Set default value of DIR constant with ~/.jefe-cli
 # Version 1.3.6
