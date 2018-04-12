@@ -125,7 +125,11 @@ init() {
     cp $DIR/templates/environments.yaml $PROYECT_DIR/environments.yaml # Copy template jefe-cli.sh for custome tasks.
     docker_env
     load_dotenv
-    sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
+    if [ "$(uname -s)" = 'Linux' ]; then
+        sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
+    else
+        sed -i '' "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
+    fi
     create_folder_structure
 
     echo "Writing new values to .gitigonre..."
@@ -256,7 +260,11 @@ set_vhost(){
 # Remove vhost to /etc/hosts file.
 remove_vhost(){
     puts "Removing vhost..." BLUE
-    sudo sh -c "sed -i '/# ----- jefe-cli_$project_name/d' /etc/hosts"
+    if [ "$(uname -s)" = 'Linux' ]; then
+        sudo sed -i "/# ----- jefe-cli_$project_name/d" /etc/hosts
+    else
+        sudo sed -i '' "/# ----- jefe-cli_$project_name/d" /etc/hosts
+    fi
     puts "Done." GREEN
 }
 
