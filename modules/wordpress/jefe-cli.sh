@@ -318,5 +318,39 @@ composer_update() {
     fi
 }
 
+# Define wordpress debug to true or false.
+debug(){
+    usage= cat <<EOF
+debug [true] [false] [-h] [--help]
+
+Arguments:
+    false			Define wordpress debug to false
+    true			Define wordpress debug to true
+    -h, --help			Print Help (this message) and exit
+EOF
+    # set an initial value for the flag
+    DEBUG=false
+
+    # read the options
+    OPTS=`getopt -o h --long help -n 'jefe' -- "$@"`
+    if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
+    eval set -- "$OPTS"
+
+    # extract options and their arguments into variables.
+    while true ; do
+        case "$1" in
+            -h|--help) echo $usage ; exit 1 ; shift ;;
+            --) shift ; break ;;
+            *) echo "Internal error!" ; exit 1 ;;
+        esac
+    done
+
+    if [[ true == "$1" ]]; then
+        DEBUG=true
+    fi
+    puts "Setting wordpress debug..."
+    docker exec -it $APP_CONTAINER_NAME bash -c "sed -i \"s/define('WP_DEBUG', .*);/define('WP_DEBUG', $DEBUG);/g\" wp-config.php"
+}
+
 # Initialice
 load_containers_names

@@ -1,7 +1,7 @@
 #!/bin/bash
 # jefe-cli
-# version 1.3.8-b1
-VERSION="1.3.8-b1"
+# version 1.4.0-development
+VERSION="1.4.0-development"
 
 # Get root dir of the jefe-cli bash script
 DIR=~/.jefe-cli
@@ -40,7 +40,7 @@ Commands:
     init			Create an empty jefe proyect and configure project
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
-    permissions		Fix permisions of the proyect folder
+    permissions			Fix permisions of the proyect folder
     ps				List containers
     remove_adminer		Remove jefe_adminer container
     remove_nginx_proxy		Remove jefe_nginx_proxy container
