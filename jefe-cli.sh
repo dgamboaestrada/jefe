@@ -1,7 +1,7 @@
 #!/bin/bash
 # jefe-cli
-# version 1.4.0-development
-VERSION="1.4.0-development"
+# version 1.4.0
+VERSION="1.4.0"
 
 # Get root dir of the jefe-cli bash script
 DIR=~/.jefe-cli
