@@ -2,4 +2,5 @@
 Commands for wordpress proyect:
     composer_install		Execute the command "composer install" in workdir folder
     composer_update		Execute the command "composer update" in workdir folder
-    set_siteurl		Update siteurl and home option values in wordpress database. Default value of the VHOST configured
+    set_siteurl			Update siteurl and home option values in wordpress database. Default value of the VHOST configured
+    debug			Define wordpress debug to true or false.

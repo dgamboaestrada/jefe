@@ -29,16 +29,6 @@ services:
       MYSQL_DATABASE: '${DB_NAME}'
       MYSQL_USER: '${DB_USER}'
       MYSQL_PASSWORD: '${DB_PASSWORD}'
-  <PROJECT_NAME>_phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: '${PROJECT_NAME}_phpmyadmin'
-    networks:
-      - jefe-cli
-    environment:
-      PMA_HOST: <PROJECT_NAME>_mysql
-      VIRTUAL_HOST: 'phpmyadmin.${VHOST}'
-    depends_on:
-      - <PROJECT_NAME>_mysql
 volumes:
   db_data: null
 networks:

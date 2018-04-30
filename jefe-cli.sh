@@ -1,7 +1,7 @@
 #!/bin/bash
 # jefe-cli
-# version 1.3.7
-VERSION="1.3.7"
+# version 1.4.0
+VERSION="1.4.0"
 
 # Get root dir of the jefe-cli bash script
 DIR=~/.jefe-cli
@@ -40,7 +40,7 @@ Commands:
     init			Create an empty jefe proyect and configure project
     itbash			Enter in bash mode iterative for the selected container
     logs			View output from containers
-    permissions		Fix permisions of the proyect folder
+    permissions			Fix permisions of the proyect folder
     ps				List containers
     remove_adminer		Remove jefe_adminer container
     remove_nginx_proxy		Remove jefe_nginx_proxy container
@@ -125,7 +125,11 @@ init() {
     cp $DIR/templates/environments.yaml $PROYECT_DIR/environments.yaml # Copy template jefe-cli.sh for custome tasks.
     docker_env
     load_dotenv
-    sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
+    if [ "$(uname -s)" = 'Linux' ]; then
+        sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
+    else
+        sed -i '' "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
+    fi
     create_folder_structure
 
     echo "Writing new values to .gitigonre..."
@@ -256,7 +260,11 @@ set_vhost(){
 # Remove vhost to /etc/hosts file.
 remove_vhost(){
     puts "Removing vhost..." BLUE
-    sudo sh -c "sed -i '/# ----- jefe-cli_$project_name/d' /etc/hosts"
+    if [ "$(uname -s)" = 'Linux' ]; then
+        sudo sed -i "/# ----- jefe-cli_$project_name/d" /etc/hosts
+    else
+        sudo sed -i '' "/# ----- jefe-cli_$project_name/d" /etc/hosts
+    fi
     puts "Done." GREEN
 }
 
