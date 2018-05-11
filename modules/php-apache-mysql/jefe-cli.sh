@@ -1,7 +1,13 @@
 #!/bin/bash
 #
 # php-apache-mysql jefe-cli.sh
-#
+
+# load container names vars
+load_containers_names(){
+    VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
+    DATABASE_CONTAINER_NAME="${project_name}_db"
+    APP_CONTAINER_NAME="${project_name}_php"
+}
 
 # Docker compose var env configuration.
 docker_env() {
@@ -284,3 +290,6 @@ composer_update() {
         ssh ${user}@${host} -p $port "cd ${public_dir}/; composer update"
     fi
 }
+
+# Initialice
+load_containers_names
