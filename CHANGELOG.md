@@ -1,3 +1,9 @@
+# Version 1.5.0
+- module-pam: Add frameworks support to php-apache-mysql module
+- moduel-pnm: Add Cakephp2.x framework support for php-nginx-mysql module
+- module-wordpress: Add php-extensions-install command for wordpress module
+- module-pam: Fix itbash command for php-apache-mysql module
+- core: Add proxy settings template for jefe-nginx-proxy
 # Version 1.4.0
 - module-wordpress: Remove phpmyadmin from wordpress module
 - core: Fix error to remove vhost in operating systems based on unix

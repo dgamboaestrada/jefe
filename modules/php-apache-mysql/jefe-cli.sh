@@ -1,7 +1,13 @@
 #!/bin/bash
 #
 # php-apache-mysql jefe-cli.sh
-#
+
+# load container names vars
+load_containers_names(){
+    VOLUME_DATABASE_CONTAINER_NAME="${project_name}_db_data"
+    DATABASE_CONTAINER_NAME="${project_name}_db"
+    APP_CONTAINER_NAME="${project_name}_php"
+}
 
 # Docker compose var env configuration.
 docker_env() {
@@ -61,6 +67,56 @@ docker_env() {
     else
         set_dotenv DB_PASSWORD $option
     fi
+    puts "Select framework:" MAGENTA
+    flag=true
+    while [ $flag = true ]; do
+        puts "1) None"
+        puts "2) Laravel"
+        puts "3) CakePHP2.x"
+        puts "4) CakePHP3.x"
+        puts "5) Symfony"
+        puts "Type the option (number) that you want(digit), followed by [ENTER]:"
+        read option
+
+        case $option in
+            1)
+                framework=None
+                puts "Write DocumentRoot (default /var/www/html):" MAGENTA
+                read option
+                if [ -z $option ]; then
+                    document_root='/var/www/html'
+                else
+                    document_root=$option
+                fi
+                flag=false
+                ;;
+            2)
+                framework=Laravel
+                document_root='/var/www/html'
+                flag=false
+                ;;
+            3)
+                framework=CakePHP2.x
+                document_root='/var/www/html/app/webroot'
+                flag=false
+                ;;
+            4)
+                framework=CakePHP3.x
+                document_root='/var/www/html/webroot'
+                flag=false
+                ;;
+            5)
+                framework=Symfony
+                document_root='/var/www/html/web'
+                flag=false
+                ;;
+            *)
+                puts "Wrong option" RED
+                flag=true
+                ;;
+        esac
+    done
+    set_dotenv FRAMEWORK $framework
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
     puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
@@ -234,3 +290,6 @@ composer_update() {
         ssh ${user}@${host} -p $port "cd ${public_dir}/; composer update"
     fi
 }
+
+# Initialice
+load_containers_names

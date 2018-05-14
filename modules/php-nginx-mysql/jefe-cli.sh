@@ -74,8 +74,9 @@ docker_env() {
     while [ $flag = true ]; do
         puts "1) None"
         puts "2) Laravel"
-        puts "3) CakePHP"
-        puts "4) Symfony"
+        puts "3) CakePHP2.x"
+        puts "4) CakePH3.x"
+        puts "5) Symfony"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:"
         read option
 
@@ -97,11 +98,16 @@ docker_env() {
                 flag=false
                 ;;
             3)
-                framework=CakePHP
-                document_root='/var/www/html/webroot'
+                framework=CakePHP2.x
+                document_root='/var/www/html/app/webroot'
                 flag=false
                 ;;
             4)
+                framework=CakePHP3.x
+                document_root='/var/www/html/webroot'
+                flag=false
+                ;;
+            5)
                 framework=Symfony
                 document_root='/var/www/html/web'
                 flag=false

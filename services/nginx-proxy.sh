@@ -9,7 +9,7 @@ start_nginx_proxy(){
     # If jefe_nginx_proxy containr not exist then create
     if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_nginx_proxy") ]; then
         puts "Running jefe_nginx_proxy container..." BLUE
-        docker run -d --name jefe_nginx_proxy -p 80:80 --network jefe-cli -v /var/run/docker.sock:/tmp/docker.sock:ro jwilder/nginx-proxy:latest
+        docker run -d --name jefe_nginx_proxy -p 80:80 --network jefe-cli -v /var/run/docker.sock:/tmp/docker.sock:ro -v ~/.jefe-cli/templates/nginx-proxy-settings.conf:/etc/nginx/conf.d/proxy-settings.conf:ro jwilder/nginx-proxy:latest
         puts "Done." GREEN
     else
         puts "Starting jefe_nginx_proxy container..." BLUE
