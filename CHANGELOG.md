@@ -1,3 +1,6 @@
+# Version x.x.x
+- core: Fix verbose of deploy command
+
 # Version 1.5.0
 - module-pam: Add frameworks support to php-apache-mysql module
 - moduel-pnm: Add Cakephp2.x framework support for php-nginx-mysql module

@@ -215,9 +215,10 @@ EOF
         rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
         set +x #verbose off
     else
-        set -v #verbose on
+        puts "----------Test Deploy----------" MAGENTA
+        set -x #verbose on
         rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
-        set +v #verbose off
+        set +x #verbose off
     fi
     cd ..
 }
