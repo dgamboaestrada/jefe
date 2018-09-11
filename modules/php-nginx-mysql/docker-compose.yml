@@ -1,7 +1,7 @@
 version: '2'
 services:
   <PROJECT_NAME>_nginx:
-    image: 'jefecito/nginx:php-fpm'
+    image: 'jefecito/nginx:${NGINX_VERSION}'
     container_name: '${PROJECT_NAME}_nginx'
     networks:
       - jefe-cli
@@ -14,7 +14,7 @@ services:
     depends_on:
       - <PROJECT_NAME>_php
   <PROJECT_NAME>_php:
-    image: 'jefecito/php:7.0-fpm'
+    image: 'jefecito/php:${PHP_VERSION}'
     hostname: '${PROJECT_NAME}_php'
     container_name: '${PROJECT_NAME}_php'
     networks:

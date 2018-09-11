@@ -263,16 +263,17 @@ EOF
     excludes=$( echo $exclude | sed -e "s/;/ --exclude=/g" )
     cd .jefe
     if $TEST; then
+        puts "----------Test Deploy----------" MAGENTA
         puts "Synchronizing themes" BLUE
-        set -v #verbose on
+        set -x #verbose on
         rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "${project_root}themes/." "${user}@${host}:${public_dir}themes/"
-        set +v #verbose off
+        set +x #verbose off
         puts "Done." GREEN
 
         puts "Synchronizing plugins" BLUE
         set -x #verbose on
         rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "${project_root}plugins/." "${user}@${host}:${public_dir}plugins/"
-        set +v #verbose off
+        set +x #verbose off
         puts "Done." GREEN
     else
         puts "Synchronizing themes" BLUE

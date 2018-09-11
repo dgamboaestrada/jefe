@@ -1,6 +1,6 @@
 #!/bin/bash
 # jefe-cli
-VERSION="1.5.0"
+VERSION="1.6.0"
 
 # Get root dir of the jefe-cli bash script
 DIR=~/.jefe-cli
@@ -215,9 +215,10 @@ EOF
         rsync -az --force --delete --progress --exclude=$excludes -e "ssh -p$port" "$project_root/." "${user}@${host}:$public_dir"
         set +x #verbose off
     else
-        set -v #verbose on
+        puts "----------Test Deploy----------" MAGENTA
+        set -x #verbose on
         rsync --dry-run -az --force --delete --progress --exclude=$excludes -e "ssh -p${port}" "$project_root/." "${user}@${host}:$public_dir"
-        set +v #verbose off
+        set +x #verbose off
     fi
     cd ..
 }
@@ -415,9 +416,6 @@ EOF
 # Config environments.
 config_environments() {
     puts "Config environments.." BLUE
-    if [[ ! -f "$PROYECT_DIR/.environments.yaml" ]]; then
-        cp "$DIR/modules/${project_type}/default.environments.yaml" $PROYECT_DIR/environments.yaml
-    fi
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
     puts "1) Nano"
