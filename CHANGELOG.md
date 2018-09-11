@@ -1,5 +1,6 @@
-# Version x.x.x
+# Version 1.6.0
 - core: Fix verbose of deploy command
+- module-pnm: Add support for Symfony3.x
 
 # Version 1.5.0
 - module-pam: Add frameworks support to php-apache-mysql module

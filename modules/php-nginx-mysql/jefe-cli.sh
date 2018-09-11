@@ -77,6 +77,7 @@ docker_env() {
         puts "3) CakePHP2.x"
         puts "4) CakePH3.x"
         puts "5) Symfony"
+        puts "6) Symfony3.x"
         puts "Type the option (number) that you want(digit), followed by [ENTER]:"
         read option
 
@@ -90,26 +91,43 @@ docker_env() {
                 else
                     document_root=$option
                 fi
+                php_version='7.0-fpm'
+                nginx_version='php-fpm'
                 flag=false
                 ;;
             2)
                 framework=Laravel
                 document_root='/var/www/html'
+                php_version='7.0-fpm'
+                nginx_version='php-fpm'
                 flag=false
                 ;;
             3)
                 framework=CakePHP2.x
                 document_root='/var/www/html/app/webroot'
+                php_version='7.0-fpm'
+                nginx_version='php-fpm'
                 flag=false
                 ;;
             4)
                 framework=CakePHP3.x
                 document_root='/var/www/html/webroot'
+                php_version='7.0-fpm'
+                nginx_version='php-fpm'
                 flag=false
                 ;;
             5)
                 framework=Symfony
                 document_root='/var/www/html/web'
+                php_version='7.1-fpm'
+                nginx_version='symfony-fpm'
+                flag=false
+                ;;
+            6)
+                framework=Symfony3
+                document_root='/var/www/html/web'
+                php_version='7.1-fpm'
+                nginx_version='symfony-fpm'
                 flag=false
                 ;;
             *)
@@ -120,6 +138,8 @@ docker_env() {
     done
     set_dotenv FRAMEWORK $framework
     set_dotenv DOCUMENT_ROOT $document_root
+    set_dotenv PHP_VERSION $php_version
+    set_dotenv NGINX_VERSION $nginx_version
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
 }
