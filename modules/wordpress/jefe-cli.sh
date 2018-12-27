@@ -13,7 +13,7 @@ load_containers_names(){
 }
 
 # Configure environments vars of docker.
-docker_env() {
+docker-env() {
     puts "Docker compose var env configuration." BLUE
     echo "" > .jefe/.env
     set_dotenv PROJECT_TYPE $project_type
@@ -121,9 +121,9 @@ EOF
 }
 
 # Import dump of dumps folder of the proyect.
-import_dump() {
+import-dump() {
     usage= cat <<EOF
-import_dump [-f] [--file] [-h] [--help]
+import-dump [-f] [--file] [-h] [--help]
 
 Arguments:
     -f, --file			File name of dump to import. Defualt is dump.sql
@@ -150,7 +150,7 @@ EOF
     done
 
     docker exec -i ${project_name}_db mysql -u ${dbuser} -p"${dbpassword}" ${dbname}  < "./dumps/${FILE_NAME}"
-    set_siteurl
+    set-siteurl
 
 }
 
@@ -190,9 +190,9 @@ EOF
 }
 
 # Update siteurl and home options value in wordpress database.
-set_siteurl() {
+set-siteurl() {
     usage= cat <<EOF
-set_siteurl [-e] [--environment] [-H] [--host] [-h] [--help]
+set-siteurl [-e] [--environment] [-H] [--host] [-h] [--help]
 
 Arguments:
     -e, --environment		Set environment to import dump. Default is docker
@@ -292,7 +292,7 @@ EOF
 }
 
 # Execute the command "composer install" in workdir folder.
-composer_install() {
+composer-install() {
     e=$1
     if [ -z "${e}" ]; then
         e="docker"
@@ -306,7 +306,7 @@ composer_install() {
 }
 
 # Execute the command "composer update" in workdir folder.
-composer_update() {
+composer-update() {
     e=$1
     if [ -z "${e}" ]; then
         e="docker"

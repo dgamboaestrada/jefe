@@ -1,6 +1,6 @@
 
 Commands for ruby-on-rails proyect:
-    bundle_install		Execute the command "bundle install" in workdir folder
+    bundle-install		Execute the command "bundle install" in workdir folder
     migrate			Execute the command "rails db:migrate" in workdir folder. Run all rails database seeds
     seed			Execute the command "rails db:seed" in workdir folder. Run all rails database seeds
     rubocop			Execute the command "rubocop -R" in workdir folder

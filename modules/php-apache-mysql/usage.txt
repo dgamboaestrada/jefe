@@ -1,4 +1,4 @@
 
 Commands for php-apache-mysql proyect:
-    composer_install		Execute the command "composer install" in workdir folder
-    composer_update		Execute the command "composer update" in workdir folder
+    composer-install		Execute the command "composer install" in workdir folder
+    composer-update		Execute the command "composer update" in workdir folder

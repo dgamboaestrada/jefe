@@ -19,6 +19,7 @@ fi
 --version(){
     puts "jefe version $VERSION"
 }
+
 # Alias of --version.
 -v(){
     --version
@@ -41,27 +42,27 @@ Commands:
     logs			View output from containers
     permissions			Fix permisions of the proyect folder
     ps				List containers
-    remove_adminer		Remove jefe_adminer container
-    remove_nginx_proxy		Remove jefe_nginx_proxy container
+    remove-adminer		Remove jefe_adminer container
+    remove-nginx-proxy		Remove jefe_nginx_proxy container
     restart			Restart containers
-    start_adminer		Create or start adminer container
-    start_nginx_proxy		Create or start nginx_proxy container
+    start-adminer		Create or start adminer container
+    start-nginx-proxy		Create or start nginx_proxy container
     stop			Stop containers
-    stop_adminer		Stop jefe_adminer container
-    stop_nginx_proxy		Stop jefe_nginx_proxy container
+    stop-adminer		Stop jefe_adminer container
+    stop-nginx-proxy		Stop jefe_nginx_proxy container
     up				Create and start containers
     update			Upgrade jefe-cli
 
 Settings commands:
-    config_environments		Config environments
-    create_folder_structure	Create folder structure of the proyect
-    docker_env			Configure environments vars of docker
-    remove_vhost 		Remove vhost to /etc/hosts file
-    set_vhost			Add vhost to /etc/hosts file
+    config-environments		Config environments
+    create-folder-structure	Create folder structure of the proyect
+    docker-env			Configure environments vars of docker
+    remove-vhost 		Remove vhost to /etc/hosts file
+    set-vhost			Add vhost to /etc/hosts file
 
 Database commands:
     dump			Create dump of the database
-    import_dump			Import dump of dumps folder of the proyect
+    import-dump			Import dump of dumps folder of the proyect
     resetdb			Delete database and create empty database
 
 Deploy commands
@@ -72,11 +73,11 @@ EOF
         cat $usage_module
     fi
 }
+
 # Alias of --help.
 -h(){
     --help
 }
-
 
 # Create an empty jefe proyect and configure project
 init() {
@@ -122,14 +123,14 @@ init() {
     source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
     cp $DIR/modules/${project_type}/docker-compose.yml $PROYECT_DIR/docker-compose.yml # Copy docker-compose configuration.
     cp $DIR/templates/environments.yaml $PROYECT_DIR/environments.yaml # Copy template jefe-cli.sh for custome tasks.
-    docker_env
+    docker-env
     load_dotenv
     if [ "$(uname -s)" = 'Linux' ]; then
         sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
     else
         sed -i '' "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
     fi
-    create_folder_structure
+    create-folder-structure
 
     echo "Writing new values to .gitigonre..."
     if [[ ! -f  "./.gitignore" ]]; then
@@ -146,12 +147,12 @@ init() {
     fi
 
     # Config environments.
-    config_environments
+    config-environments
 }
 
 # Configure environments vars of docker.
 # It is necessary to implement.
-docker_env() {
+docker-env() {
     echo 'Not implemented'
     exit 1
 }
@@ -165,7 +166,7 @@ dump() {
 
 # Import dump of dumps folder of the proyect.
 # It is necessary to implement.
-import_dump() {
+import-dump() {
     echo 'Not implemented'
     exit 1
 }
@@ -224,7 +225,7 @@ EOF
 }
 
 # Create folder structure of the project.
-create_folder_structure() {
+create-folder-structure() {
     puts "Make directory structure." BLUE
     echo "Creating app directory..."
     if [[ ! -d "./${project_root}" ]]; then
@@ -245,8 +246,8 @@ create_folder_structure() {
 }
 
 # Add vhost to /etc/hosts file.
-set_vhost(){
-    remove_vhost # Remove old vhost.
+set-vhost(){
+    remove-vhost # Remove old vhost.
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         hosts="$( echo "$VHOST" | tr ',' ' ' )"
@@ -258,7 +259,7 @@ set_vhost(){
 }
 
 # Remove vhost to /etc/hosts file.
-remove_vhost(){
+remove-vhost(){
     puts "Removing vhost..." BLUE
     if [ "$(uname -s)" = 'Linux' ]; then
         sudo sed -i "/# ----- jefe-cli_$project_name/d" /etc/hosts
@@ -319,7 +320,7 @@ EOF
 
     before_up
     start_nginx_proxy
-    set_vhost
+    set-vhost
     permissions
     cd $PROYECT_DIR/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
@@ -343,7 +344,7 @@ before_up() {
 
 # Stop containers.
 stop() {
-    remove_vhost
+    remove-vhost
     cd $PROYECT_DIR/
     docker-compose -p $project_name stop
     cd ..
@@ -354,7 +355,7 @@ restart() {
     cd $PROYECT_DIR/
     docker-compose -p $project_name restart
     cd ..
-    set_vhost
+    set-vhost
     after_up
 }
 
@@ -410,11 +411,11 @@ EOF
     docker-compose -p $project_name down $v
     puts "Done." GREEN
     cd ..
-    remove_vhost
+    remove-vhost
 }
 
 # Config environments.
-config_environments() {
+config-environments() {
     puts "Config environments.." BLUE
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
@@ -438,7 +439,7 @@ config_environments() {
 }
 
 # Configure docker-compose var env.
-docker_env() {
+docker-env() {
     #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
     #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
     #     fi

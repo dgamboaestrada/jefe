@@ -4,7 +4,7 @@
 #
 
 # Create or start nginx_proxy container.
-start_nginx_proxy(){
+start-nginx-proxy(){
     jefe_cli_network
     # If jefe_nginx_proxy containr not exist then create
     if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_nginx_proxy") ]; then
@@ -19,7 +19,7 @@ start_nginx_proxy(){
 }
 
 # Stop jefe_nginx_proxy container.
-stop_nginx_proxy(){
+stop-nginx-proxy(){
     # If jefe_nginx_proxy containr is running then stop
     puts "Stoping jefe_nginx_proxy container..." BLUE
     if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_nginx_proxy") ]; then
@@ -29,7 +29,7 @@ stop_nginx_proxy(){
 }
 
 # Remove jefe_nginx_proxy container.
-remove_nginx_proxy(){
+remove-nginx-proxy(){
     stop_nginx_proxy
     puts "Removing jefe_nginx_proxy container..." BLUE
     docker rm jefe_nginx_proxy

@@ -10,7 +10,7 @@ load_containers_names(){
 }
 
 # Docker compose var env configuration.
-docker_env() {
+docker-env() {
     puts "Docker compose var env configuration." BLUE
     #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
     #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
@@ -123,8 +123,8 @@ docker_env() {
 }
 
 # Add vhost of /etc/hosts file
-set_vhost(){
-    remove_vhost # Remove old vhost
+set-vhost(){
+    remove-vhost # Remove old vhost
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         load_dotenv
@@ -189,9 +189,9 @@ EOF
 }
 
 # Import dump of dumps folder of the proyect.
-import_dump() {
+import-dump() {
     usage= cat <<EOF
-import_dump [-e] [--environment] [-f] [--file] [-h] [--help]
+import-dump [-e] [--environment] [-f] [--file] [-h] [--help]
 
 Arguments:
     -e, --environment		Set environment to import dump. Default is docker
@@ -263,7 +263,7 @@ EOF
     fi
 }
 
-composer_install() {
+composer-install() {
     e=$1
     if [ -z "${e}" ]; then
         e="docker"
@@ -277,7 +277,7 @@ composer_install() {
     fi
 }
 
-composer_update() {
+composer-update() {
     e=$1
     if [ -z "${e}" ]; then
         e="docker"
