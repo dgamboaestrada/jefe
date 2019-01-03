@@ -388,5 +388,11 @@ upload_max_filesize = 100M
 #     docker exec -it $APP_CONTAINER_NAME bash -c "apt-get update && apt-get install -y zlib1g-dev && rm -rf /var/lib/apt/lists/* && docker-php-ext-install zip"
 }
 
+# Generate tab completion strings.
+module_completions() {
+    completions="composer-install composer-update set-siteurl debug"
+    echo $completions
+}
+
 # Initialice
 load_containers_names

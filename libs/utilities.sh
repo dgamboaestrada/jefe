@@ -107,8 +107,8 @@ load_settings_env(){
 function_exists() {
     declare -f $1 > /dev/null
     if [ $? == 0 ]; then
-        echo true
+        return 0
     else
-        echo false
+        return 1
     fi
 }

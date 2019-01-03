@@ -52,6 +52,7 @@ Commands:
     stop-nginx-proxy		Stop jefe_nginx_proxy container
     up				Create and start containers
     update			Upgrade jefe-cli
+    completions			Generate tab completion strings
 
 Settings commands:
     config-environments		Config environments
@@ -548,6 +549,15 @@ if [[ -f  "$PROYECT_DIR/.env" ]]; then
         source $PROYECT_DIR/jefe-cli.sh
     fi
 fi
+
+# Generate tab completion strings.
+completions() {
+    completions="destroy down init itbash logs permissions ps remove-adminer remove-nginx-proxy restart start-adminer start-nginx-proxy restart start-adminer start-nginx-proxy stop stop-adminer stop-nginx-proxy up update config-environments create-folder-structure docker-env remove-vhost set-vhost dump import-dump resetdb deploy completions"
+    if function_exists module_completions ; then
+        completions=("$completions $(module_completions)")
+    fi
+    echo $completions
+}
 
 # call arguments verbatim:
 $@
