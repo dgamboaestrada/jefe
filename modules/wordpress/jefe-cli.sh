@@ -3,7 +3,7 @@
 # wordpress jefe-cli.sh
 
 # Load utilities
-source ~/.jefe-cli/libs/utilities.sh
+source $DIR/libs/utilities.sh
 
 # load container names vars
 load_containers_names(){
@@ -84,14 +84,6 @@ after_up(){
 
 # Create dump of the database of the proyect.
 dump() {
-    usage= cat <<EOF
-dump [-e] [--environment] [-f] [--file] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
-    -f, --file			File name of dump. Default is dump.sql
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
     FILE_NAME="dump.sql"
@@ -106,7 +98,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -f|--file) FILE_NAME=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_dump ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -122,13 +114,6 @@ EOF
 
 # Import dump of dumps folder of the proyect.
 import-dump() {
-    usage= cat <<EOF
-import-dump [-f] [--file] [-h] [--help]
-
-Arguments:
-    -f, --file			File name of dump to import. Defualt is dump.sql
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
     FILE_NAME="dump.sql"
@@ -143,7 +128,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -f|--file) FILE_NAME=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_import_dump ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -156,13 +141,6 @@ EOF
 
 # Delete database and create empty database.
 resetdb() {
-    usage= cat <<EOF
-resetdb [-e] [--environment] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
 
@@ -175,7 +153,7 @@ EOF
     while true ; do
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_resetdb ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -191,14 +169,6 @@ EOF
 
 # Update siteurl and home options value in wordpress database.
 set-siteurl() {
-    usage= cat <<EOF
-set-siteurl [-e] [--environment] [-H] [--host] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
-    -H, --host			Host to set. Defualt value of the VHOST configured
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
     HOST="$VHOST"
@@ -213,7 +183,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -H|--host) HOST=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_set_siteurl ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -231,14 +201,6 @@ EOF
 
 # Synchronize files to the selected environment.
 deploy() {
-    usage= cat <<EOF
-ps [-e <environment>] [--environment <environment>] [-t] [--test] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to deployed
-    -t, --test			Perform a test of the files to be synchronized
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT=""
     TEST=false
@@ -253,7 +215,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -t|--test) TEST=true ; shift ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_deploy ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -321,14 +283,6 @@ composer-update() {
 
 # Define wordpress debug to true or false.
 debug(){
-    usage= cat <<EOF
-debug [true] [false] [-h] [--help]
-
-Arguments:
-    false			Define wordpress debug to false
-    true			Define wordpress debug to true
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     DEBUG=false
 
@@ -340,7 +294,7 @@ EOF
     # extract options and their arguments into variables.
     while true ; do
         case "$1" in
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_debug ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -349,7 +303,7 @@ EOF
     if [[ true == "$1" ]]; then
         DEBUG=true
     fi
-    puts "Setting wordpress debug..."
+    puts "Setting wordpress debug as '$DEBUG'" YELLOW
     docker exec -it $APP_CONTAINER_NAME bash -c "sed -i \"s/define('WP_DEBUG', .*);/define('WP_DEBUG', $DEBUG);/g\" wp-config.php"
 }
 

@@ -9,6 +9,7 @@ PROYECT_DIR="$PWD/.jefe"
 # Load libraries
 source $DIR/libs/loader.sh
 source $DIR/services/loader.sh
+source $DIR/usage.sh
 
 # Load dotenv vars
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
@@ -27,51 +28,10 @@ fi
 
 # Print usage.
 --help(){
-    usage= cat <<EOF
-jefe [-h] [--help] <command>
-
-Arguments:
-    -h, --help			Print Help (this message) and exit
-    -v, --version		Print version information and exit
-
-Commands:
-    destroy			Remove containers of docker-compose and delete folder .jefe
-    down			Stop and remove containers, networks, images, and volumes
-    init			Create an empty jefe proyect and configure project
-    itbash			Enter in bash mode iterative for the selected container
-    logs			View output from containers
-    permissions			Fix permisions of the proyect folder
-    ps				List containers
-    remove-adminer		Remove jefe_adminer container
-    remove-nginx-proxy		Remove jefe_nginx_proxy container
-    restart			Restart containers
-    start-adminer		Create or start adminer container
-    start-nginx-proxy		Create or start nginx_proxy container
-    stop			Stop containers
-    stop-adminer		Stop jefe_adminer container
-    stop-nginx-proxy		Stop jefe_nginx_proxy container
-    up				Create and start containers
-    update			Upgrade jefe-cli
-    completions			Generate tab completion strings
-
-Settings commands:
-    config-environments		Config environments
-    create-folder-structure	Create folder structure of the proyect
-    docker-env			Configure environments vars of docker
-    remove-vhost 		Remove vhost to /etc/hosts file
-    set-vhost			Add vhost to /etc/hosts file
-
-Database commands:
-    dump			Create dump of the database
-    import-dump			Import dump of dumps folder of the proyect
-    resetdb			Delete database and create empty database
-
-Deploy commands
-    deploy			Synchronize files to the selected environment
-EOF
-    usage_module=$DIR/modules/${project_type}/usage.txt
-    if [[ -f  "$usage_module" ]]; then
-        cat $usage_module
+    usage
+    if function_exists usage_module ; then
+        echo ''
+        usage_module
     fi
 }
 
@@ -181,14 +141,6 @@ resetdb() {
 
 # Synchronize files to the selected environment
 deploy() {
-    usage= cat <<EOF
-ps [-e <environment>] [--environment <environment>] [-t] [--test] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to deployed
-    -t, --test			Perform a test of the files to be synchronized
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT=""
     TEST=false
@@ -203,7 +155,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -t|--test) TEST=true ; shift ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_deploy ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -293,13 +245,6 @@ destroy() {
 
 # Create and start containers.
 up() {
-    usage= cat <<EOF
-up [-h] [--help]
-
-Arguments:
-    --logs			View output from containers
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     DOCKER_COMPOSE_FILE="docker-compose.yml"
     LOGS=false
@@ -313,7 +258,7 @@ EOF
     while true ; do
         case "$1" in
             --logs) LOGS=true ; shift ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_up ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -362,13 +307,6 @@ restart() {
 
 # Stop and remove containers, networks, images, and volumes.
 down() {
-    usage= cat <<EOF
-jefe down [-v <option>] [--volumes <option>] [-h] [--help]
-
-Arguments:
-    -v, --volumes		Remove volumes of the proyect. Options force, not_force.
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     VOLUMES=false
     FORCE=false
@@ -388,7 +326,7 @@ EOF
                      not_force|NOT_FORCE) FORCE=false ; shift 2 ;;
                      *) puts "Invalid value for -v|--volume." RED ; exit 1 ; shift 2 ;;
                  esac ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_down ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -477,13 +415,6 @@ ps() {
 
 # Enter in bash mode iterative for the selected container.
 itbash() {
-    usage= cat <<EOF
-itbash [-c] [--container] [-h] [--help] <container_name>
-
-Arguments:
-    -c, --container		Set container name to execute bash iterative
-    -h, --help			Print Help (this message) and exit
-EOF
     # read the options
     OPTS=`getopt -o c:h --long container:,help -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
@@ -493,7 +424,7 @@ EOF
     while true ; do
         case "$1" in
             -c|--container) container_name=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_itbash ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -544,7 +475,8 @@ update() {
 }
 
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
-    source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    source $DIR/modules/${project_type}/usage.sh # Load usage of module
+    source $DIR/modules/${project_type}/jefe-cli.sh # Load commands of module.
     if [[ -f  "$PROYECT_DIR/jefe-cli.sh" ]]; then
         source $PROYECT_DIR/jefe-cli.sh
     fi

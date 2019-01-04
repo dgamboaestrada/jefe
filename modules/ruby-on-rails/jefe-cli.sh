@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# php-nginx-mysql jefe-cli.sh
+# ruby-on-rails jefe-cli.sh
 #
 
 # load container names vars
@@ -72,14 +72,6 @@ docker-env() {
 
 # Create dump of the database of the proyect.
 dump() {
-    usage= cat <<EOF
-dump [-e] [--environment] [-f] [--file] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
-    -f, --file			File name of dump. Default is dump.sql
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
     FILE_NAME="dump.sql"
@@ -94,7 +86,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -f|--file) FILE_NAME=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_dump ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -107,14 +99,6 @@ EOF
 
 # Import dump of dumps folder of the proyect.
 import-dump() {
-    usage= cat <<EOF
-import-dump [-e] [--environment] [-f] [--file] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
-    -f, --file			File name of dump to import. Defualt is dump.sql
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
     FILE_NAME="dump.sql"
@@ -129,7 +113,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -f|--file) FILE_NAME=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_import_dump ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -142,13 +126,6 @@ EOF
 
 # Delete database and create empty database.
 resetdb() {
-    usage= cat <<EOF
-resetdb [-e] [--environment] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to import dump. Default is docker
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT="docker"
 
@@ -161,7 +138,7 @@ EOF
     while true ; do
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_resetdb ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
