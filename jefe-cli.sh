@@ -28,6 +28,7 @@ fi
 
 # Print usage.
 --help(){
+    cat $DIR/logo.txt
     usage
     if function_exists usage_module ; then
         echo ''
