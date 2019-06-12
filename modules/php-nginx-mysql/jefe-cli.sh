@@ -11,43 +11,8 @@ load_containers_names(){
     NGINX_CONTAINER_NAME="${project_name}_nginx"
 }
 
-# Docker compose var env configuration.
-docker-env() {
-    puts "Docker compose var env configuration." BLUE
-    #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
-    #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
-    #     fi
-    echo "" > $PROYECT_DIR/.env
-    set_dotenv PROJECT_TYPE $project_type
-    puts "Write project name (default $project_type):" MAGENTA
-    read proyect_name
-    if [ -z $proyect_name ]; then
-        set_dotenv PROJECT_NAME $project_type
-        proyect_name=$project_type
-    else
-        set_dotenv PROJECT_NAME $proyect_name
-    fi
-    puts "Write project root, directory path from your proyect (default src):" MAGENTA
-    read option
-    if [ -z $option ]; then
-        set_dotenv PROJECT_ROOT "../src"
-    else
-        set_dotenv PROJECT_ROOT "../$option"
-    fi
-    puts "Write vhost (default $proyect_name.local):" MAGENTA
-    read option
-    if [ -z $option ]; then
-        set_dotenv VHOST "$proyect_name.local"
-    else
-        set_dotenv VHOST $option
-    fi
-    puts "Write environment var name, (default development):" MAGENTA
-    read option
-    if [ -z $option ]; then
-        set_dotenv ENVIRONMENT "development"
-    else
-        set_dotenv ENVIRONMENT "$option"
-    fi
+# Configure environments vars of module for docker image.
+module_docker_env() {
     puts "Write database name (default $proyect_name):" MAGENTA
     read option
     if [ -z $option ]; then

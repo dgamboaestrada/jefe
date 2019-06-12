@@ -85,7 +85,7 @@ init() {
     source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
     cp $DIR/modules/${project_type}/docker-compose.yml $PROYECT_DIR/docker-compose.yml # Copy docker-compose configuration.
     cp $DIR/templates/environments.yaml $PROYECT_DIR/environments.yaml # Copy template jefe-cli.sh for custome tasks.
-    docker-env
+    docker_env
     load_dotenv
     if [ "$(uname -s)" = 'Linux' ]; then
         sed -i "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
@@ -112,11 +112,42 @@ init() {
     config-environments
 }
 
-# Configure environments vars of docker.
-# It is necessary to implement.
-docker-env() {
-    echo 'Not implemented'
-    exit 1
+# Configure environments vars of docker image.
+docker_env() {
+    puts "Docker compose var env configuration." BLUE
+    echo "" > .jefe/.env
+    set_dotenv PROJECT_TYPE $project_type
+    puts "Write project name (default $project_type):" MAGENTA
+    read proyect_name
+    if [ -z $proyect_name ]; then
+        set_dotenv PROJECT_NAME $project_type
+        proyect_name=$project_type
+    else
+        set_dotenv PROJECT_NAME $proyect_name
+    fi
+    puts "Write project root, directory path from your proyect (default src):" MAGENTA
+    read option
+    if [ -z $option ]; then
+        set_dotenv PROJECT_ROOT "../src/"
+    else
+        set_dotenv PROJECT_ROOT "../${option}/"
+    fi
+    puts "Write vhost (default $proyect_name.local):" MAGENTA
+    read option
+    if [ -z $option ]; then
+        set_dotenv VHOST "$proyect_name.local"
+    else
+        set_dotenv VHOST $option
+    fi
+    puts "Write environment var value, (default development):" MAGENTA
+    read option
+    if [ -z $option ]; then
+        set_dotenv ENVIRONMENT "development"
+    else
+        set_dotenv ENVIRONMENT "$option"
+    fi
+
+    module_docker_env # Call configurations of environments of the module.
 }
 
 # Create dump of the database of the proyect.
@@ -266,7 +297,7 @@ up() {
     done
 
     before_up
-    start_nginx_proxy
+    start-nginx-proxy
     set-vhost
     permissions
     cd $PROYECT_DIR/
@@ -379,7 +410,7 @@ config-environments() {
 }
 
 # Configure docker-compose var env.
-docker-env() {
+docker_env() {
     #     if [[ ! -f "$PROYECT_DIR/.env" ]]; then
     #         cp $PROYECT_DIR/default.env $PROYECT_DIR/.env
     #     fi
@@ -485,7 +516,7 @@ fi
 
 # Generate tab completion strings.
 completions() {
-    completions="destroy down init itbash logs permissions ps remove-adminer remove-nginx-proxy restart start-adminer start-nginx-proxy restart start-adminer start-nginx-proxy stop stop-adminer stop-nginx-proxy up update config-environments create-folder-structure docker-env remove-vhost set-vhost dump import-dump resetdb deploy completions"
+    completions="destroy down init itbash logs permissions ps remove-adminer remove-nginx-proxy restart start-adminer start-nginx-proxy restart start-adminer start-nginx-proxy stop stop-adminer stop-nginx-proxy up update config-environments create-folder-structure docker_env remove-vhost set-vhost dump import-dump resetdb deploy completions"
     if function_exists module_completions ; then
         completions=("$completions $(module_completions)")
     fi

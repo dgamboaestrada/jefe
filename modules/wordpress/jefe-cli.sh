@@ -12,48 +12,16 @@ load_containers_names(){
     APP_CONTAINER_NAME="${project_name}_wordpress"
 }
 
-# Configure environments vars of docker.
-docker-env() {
-    puts "Docker compose var env configuration." BLUE
-    echo "" > .jefe/.env
-    set_dotenv PROJECT_TYPE $project_type
-    puts "Write project name (default $project_type):" MAGENTA
-    read proyect_name
-    if [ -z $proyect_name ]; then
-        set_dotenv PROJECT_NAME $project_type
-        proyect_name=$project_type
-    else
-        set_dotenv PROJECT_NAME $proyect_name
-    fi
-    puts "Write project root, directory path from your proyect (default src):" MAGENTA
-    read option
-    if [ -z $option ]; then
-        set_dotenv PROJECT_ROOT "../src/"
-    else
-        set_dotenv PROJECT_ROOT "../${option}/"
-    fi
-    puts "Write vhost (default $proyect_name.local):" MAGENTA
-    read option
-    if [ -z $option ]; then
-        set_dotenv VHOST "$proyect_name.local"
-    else
-        set_dotenv VHOST $option
-    fi
-    puts "Write environment var name, (default development):" MAGENTA
-    read option
-    if [ -z $option ]; then
-        set_dotenv ENVIRONMENT "development"
-    else
-        set_dotenv ENVIRONMENT "$option"
-    fi
-    puts "Write wordpress version, (default latest):" MAGENTA
+# Configure environments vars of module for docker image.
+module_docker_env() {
+    puts "Write WordPress version, (default latest):" MAGENTA
     read option
     if [ -z $option ]; then
         set_dotenv WORDPRESS_VERSION "latest"
     else
         set_dotenv WORDPRESS_VERSION "$option"
     fi
-    puts "Write wordpress table prefix (default wp_):" MAGENTA
+    puts "Write WordPress table prefix (default wp_):" MAGENTA
     read option
     if [ -z $option ]; then
         set_dotenv WORDPRESS_TABLE_PREFIX "wp_"
@@ -63,13 +31,12 @@ docker-env() {
 
     puts "Database root password is password" YELLOW
     set_dotenv DB_ROOT_PASSWORD "password"
-    puts "Database name is wordpress" YELLOW
+    puts "Database name is WordPress" YELLOW
     set_dotenv DB_NAME "wordpress"
-    puts "Database user is wordpress" YELLOW
+    puts "Database user is WordPress" YELLOW
     set_dotenv DB_USER "wordpress"
-    puts "Database wordpress password is wordpress" YELLOW
+    puts "Database WordPress password is wordpress" YELLOW
     set_dotenv DB_PASSWORD "wordpress"
-    puts "phpMyAdmin url: phpmyadmin.$vhost" YELLOW
 }
 
 # Fix permisions of the proyect folder
