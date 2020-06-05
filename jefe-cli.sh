@@ -9,6 +9,7 @@ PROYECT_DIR="$PWD/.jefe"
 # Load libraries
 source $DIR/libs/loader.sh
 source $DIR/services/loader.sh
+source $DIR/usage.sh
 
 # Load dotenv vars
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
@@ -19,6 +20,7 @@ fi
 --version(){
     puts "jefe version $VERSION"
 }
+
 # Alias of --version.
 -v(){
     --version
@@ -26,57 +28,18 @@ fi
 
 # Print usage.
 --help(){
-    usage= cat <<EOF
-jefe [-h] [--help] <command>
-
-Arguments:
-    -h, --help			Print Help (this message) and exit
-    -v, --version		Print version information and exit
-
-Commands:
-    destroy			Remove containers of docker-compose and delete folder .jefe
-    down			Stop and remove containers, networks, images, and volumes
-    init			Create an empty jefe proyect and configure project
-    itbash			Enter in bash mode iterative for the selected container
-    logs			View output from containers
-    permissions			Fix permisions of the proyect folder
-    ps				List containers
-    remove_adminer		Remove jefe_adminer container
-    remove_nginx_proxy		Remove jefe_nginx_proxy container
-    restart			Restart containers
-    start_adminer		Create or start adminer container
-    start_nginx_proxy		Create or start nginx_proxy container
-    stop			Stop containers
-    stop_adminer		Stop jefe_adminer container
-    stop_nginx_proxy		Stop jefe_nginx_proxy container
-    up				Create and start containers
-    update			Upgrade jefe-cli
-
-Settings commands:
-    config_environments		Config environments
-    create_folder_structure	Create folder structure of the proyect
-    docker_env			Configure environments vars of docker
-    remove_vhost 		Remove vhost to /etc/hosts file
-    set_vhost			Add vhost to /etc/hosts file
-
-Database commands:
-    dump			Create dump of the database
-    import_dump			Import dump of dumps folder of the proyect
-    resetdb			Delete database and create empty database
-
-Deploy commands
-    deploy			Synchronize files to the selected environment
-EOF
-    usage_module=$DIR/modules/${project_type}/usage.txt
-    if [[ -f  "$usage_module" ]]; then
-        cat $usage_module
+    cat $DIR/logo.txt
+    usage
+    if function_exists usage_module ; then
+        echo ''
+        usage_module
     fi
 }
+
 # Alias of --help.
 -h(){
     --help
 }
-
 
 # Create an empty jefe proyect and configure project
 init() {
@@ -129,7 +92,7 @@ init() {
     else
         sed -i '' "s/<PROJECT_NAME>/${project_name}/g" $PROYECT_DIR/docker-compose.yml
     fi
-    create_folder_structure
+    create-folder-structure
 
     echo "Writing new values to .gitigonre..."
     if [[ ! -f  "./.gitignore" ]]; then
@@ -146,14 +109,45 @@ init() {
     fi
 
     # Config environments.
-    config_environments
+    config-environments
 }
 
-# Configure environments vars of docker.
-# It is necessary to implement.
+# Configure environments vars of docker image.
 docker_env() {
-    echo 'Not implemented'
-    exit 1
+    puts "Docker compose var env configuration." BLUE
+    echo "" > .jefe/.env
+    set_dotenv PROJECT_TYPE $project_type
+    puts "Write project name (default $project_type):" MAGENTA
+    read proyect_name
+    if [ -z $proyect_name ]; then
+        set_dotenv PROJECT_NAME $project_type
+        proyect_name=$project_type
+    else
+        set_dotenv PROJECT_NAME $proyect_name
+    fi
+    puts "Write project root, directory path from your proyect (default src):" MAGENTA
+    read option
+    if [ -z $option ]; then
+        set_dotenv PROJECT_ROOT "../src/"
+    else
+        set_dotenv PROJECT_ROOT "../${option}/"
+    fi
+    puts "Write vhost (default $proyect_name.local):" MAGENTA
+    read option
+    if [ -z $option ]; then
+        set_dotenv VHOST "$proyect_name.local"
+    else
+        set_dotenv VHOST $option
+    fi
+    puts "Write environment var value, (default development):" MAGENTA
+    read option
+    if [ -z $option ]; then
+        set_dotenv ENVIRONMENT "development"
+    else
+        set_dotenv ENVIRONMENT "$option"
+    fi
+
+    module_docker_env # Call configurations of environments of the module.
 }
 
 # Create dump of the database of the proyect.
@@ -165,7 +159,7 @@ dump() {
 
 # Import dump of dumps folder of the proyect.
 # It is necessary to implement.
-import_dump() {
+import-dump() {
     echo 'Not implemented'
     exit 1
 }
@@ -179,14 +173,6 @@ resetdb() {
 
 # Synchronize files to the selected environment
 deploy() {
-    usage= cat <<EOF
-ps [-e <environment>] [--environment <environment>] [-t] [--test] [-h] [--help]
-
-Arguments:
-    -e, --environment		Set environment to deployed
-    -t, --test			Perform a test of the files to be synchronized
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     ENVIRONMENT=""
     TEST=false
@@ -201,7 +187,7 @@ EOF
         case "$1" in
             -e|--environment) ENVIRONMENT=$2 ; shift 2 ;;
             -t|--test) TEST=true ; shift ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_deploy ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -224,7 +210,7 @@ EOF
 }
 
 # Create folder structure of the project.
-create_folder_structure() {
+create-folder-structure() {
     puts "Make directory structure." BLUE
     echo "Creating app directory..."
     if [[ ! -d "./${project_root}" ]]; then
@@ -245,8 +231,8 @@ create_folder_structure() {
 }
 
 # Add vhost to /etc/hosts file.
-set_vhost(){
-    remove_vhost # Remove old vhost.
+set-vhost(){
+    remove-vhost # Remove old vhost.
     if [ ! "$( grep jefe-cli_wordpress /etc/hosts )" ]; then
         puts "Setting vhost..." BLUE
         hosts="$( echo "$VHOST" | tr ',' ' ' )"
@@ -258,7 +244,7 @@ set_vhost(){
 }
 
 # Remove vhost to /etc/hosts file.
-remove_vhost(){
+remove-vhost(){
     puts "Removing vhost..." BLUE
     if [ "$(uname -s)" = 'Linux' ]; then
         sudo sed -i "/# ----- jefe-cli_$project_name/d" /etc/hosts
@@ -291,13 +277,6 @@ destroy() {
 
 # Create and start containers.
 up() {
-    usage= cat <<EOF
-up [-h] [--help]
-
-Arguments:
-    --logs			View output from containers
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     DOCKER_COMPOSE_FILE="docker-compose.yml"
     LOGS=false
@@ -311,15 +290,15 @@ EOF
     while true ; do
         case "$1" in
             --logs) LOGS=true ; shift ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_up ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
     done
 
     before_up
-    start_nginx_proxy
-    set_vhost
+    start-nginx-proxy
+    set-vhost
     permissions
     cd $PROYECT_DIR/
     docker-compose -f $DOCKER_COMPOSE_FILE -p $project_name up -d
@@ -343,7 +322,7 @@ before_up() {
 
 # Stop containers.
 stop() {
-    remove_vhost
+    remove-vhost
     cd $PROYECT_DIR/
     docker-compose -p $project_name stop
     cd ..
@@ -354,19 +333,12 @@ restart() {
     cd $PROYECT_DIR/
     docker-compose -p $project_name restart
     cd ..
-    set_vhost
+    set-vhost
     after_up
 }
 
 # Stop and remove containers, networks, images, and volumes.
 down() {
-    usage= cat <<EOF
-jefe down [-v <option>] [--volumes <option>] [-h] [--help]
-
-Arguments:
-    -v, --volumes		Remove volumes of the proyect. Options force, not_force.
-    -h, --help			Print Help (this message) and exit
-EOF
     # set an initial value for the flag
     VOLUMES=false
     FORCE=false
@@ -386,7 +358,7 @@ EOF
                      not_force|NOT_FORCE) FORCE=false ; shift 2 ;;
                      *) puts "Invalid value for -v|--volume." RED ; exit 1 ; shift 2 ;;
                  esac ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_down ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -410,11 +382,11 @@ EOF
     docker-compose -p $project_name down $v
     puts "Done." GREEN
     cd ..
-    remove_vhost
+    remove-vhost
 }
 
 # Config environments.
-config_environments() {
+config-environments() {
     puts "Config environments.." BLUE
     puts "Select editor to open environment settings file" MAGENTA
     puts "0) Vi"
@@ -475,13 +447,6 @@ ps() {
 
 # Enter in bash mode iterative for the selected container.
 itbash() {
-    usage= cat <<EOF
-itbash [-c] [--container] [-h] [--help] <container_name>
-
-Arguments:
-    -c, --container		Set container name to execute bash iterative
-    -h, --help			Print Help (this message) and exit
-EOF
     # read the options
     OPTS=`getopt -o c:h --long container:,help -n 'jefe' -- "$@"`
     if [ $? != 0 ]; then puts "Invalid options." RED; exit 1; fi
@@ -491,7 +456,7 @@ EOF
     while true ; do
         case "$1" in
             -c|--container) container_name=$2 ; shift 2 ;;
-            -h|--help) echo $usage ; exit 1 ; shift ;;
+            -h|--help) usage_itbash ; exit 1 ; shift ;;
             --) shift ; break ;;
             *) echo "Internal error!" ; exit 1 ;;
         esac
@@ -542,11 +507,21 @@ update() {
 }
 
 if [[ -f  "$PROYECT_DIR/.env" ]]; then
-    source $DIR/modules/${project_type}/jefe-cli.sh # Load tasks of module.
+    source $DIR/modules/${project_type}/usage.sh # Load usage of module
+    source $DIR/modules/${project_type}/jefe-cli.sh # Load commands of module.
     if [[ -f  "$PROYECT_DIR/jefe-cli.sh" ]]; then
         source $PROYECT_DIR/jefe-cli.sh
     fi
 fi
+
+# Generate tab completion strings.
+completions() {
+    completions="destroy down init itbash logs permissions ps remove-adminer remove-nginx-proxy restart start-adminer start-nginx-proxy restart start-adminer start-nginx-proxy stop stop-adminer stop-nginx-proxy up update config-environments create-folder-structure docker_env remove-vhost set-vhost dump import-dump resetdb deploy completions"
+    if function_exists module_completions ; then
+        completions=("$completions $(module_completions)")
+    fi
+    echo $completions
+}
 
 # call arguments verbatim:
 $@

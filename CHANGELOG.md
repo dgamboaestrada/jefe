@@ -1,3 +1,12 @@
+# Version 1.7.0
+- core: Change underscore to middle dash in the task names
+- core: Add completions command
+- module-wordpress: Remove php-extensions-install command
+- core: Refactoring command help
+- core: Print logo in help command
+- core: Improve docker_env function
+- core: Add is_successful function
+
 # Version 1.6.0
 - core: Fix verbose of deploy command
 - module-pnm: Add support for Symfony3.x

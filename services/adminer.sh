@@ -4,7 +4,7 @@
 #
 
 # Create or start adminer container.
-start_adminer(){
+start-adminer(){
     jefe_cli_network
     # If jefe_adminer containr not exist then create
     if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_adminer") ]; then
@@ -19,7 +19,7 @@ start_adminer(){
 }
 
 # Stop jefe_adminer container.
-stop_adminer(){
+stop-adminer(){
     puts "Stoping jefe_adminer container..." BLUE
     # If jefe_adminer containr is running then stop
     if [ ! $(docker ps -a --format "table {{.Names}}" | grep "^jefe_adminer") ]; then
@@ -29,7 +29,7 @@ stop_adminer(){
 }
 
 # Remove jefe_adminer container.
-remove_adminer(){
+remove-adminer(){
     stop_adminer
     puts "Removing jefe_adminer container..." BLUE
     docker rm jefe_adminer

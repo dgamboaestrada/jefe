@@ -107,8 +107,22 @@ load_settings_env(){
 function_exists() {
     declare -f $1 > /dev/null
     if [ $? == 0 ]; then
-        echo true
+        return 0
     else
-        echo false
+        return 1
     fi
 }
+
+# Print a successful message if the previous command was executed successfuly and print a error message if not.
+is_successful() {
+    exit_status=$?
+    [[ -z $1 ]] && error_message="Error." || error_message=$1
+
+    if [ "$exit_status" = 0 ]; then
+        puts 'Done.' GREEN
+    else
+        puts $error_message RED
+        exit 1
+    fi
+}
+
